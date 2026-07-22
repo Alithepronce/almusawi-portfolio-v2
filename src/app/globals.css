@@ -64,6 +64,7 @@ body {
 .gold-luxury-text {
   background: linear-gradient(135deg, #F0DA8A 0%, #D4AF37 50%, #A3821A 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 

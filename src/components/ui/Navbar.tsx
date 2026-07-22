@@ -29,8 +29,8 @@ export default function Navbar() {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const isAudioEnabled = useStore((s) => s.isAudioEnabled);
-  const toggleAudio = useStore((s) => s.toggleAudio);
+  const isAudioEnabled = useStore((s: any) => s.isAudioEnabled);
+  const toggleAudio = useStore((s: any) => s.toggleAudio);
   const { playClick, playHover, playTheme } = useInteractiveSounds();
 
   useEffect(() => setMounted(true), []);
