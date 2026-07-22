@@ -15,6 +15,7 @@ export const translations = {
   contact: { ar: 'تواصل', en: 'Contact' },
   guestbook: { ar: 'سجل الزوار', en: 'Guestbook' },
   links: { ar: 'الروابط', en: 'Links' },
+  officeTitle: { ar: 'مكتب الموسوي للطباعة والحلول البرمجية', en: 'Al-Musawi Office for Printing & Software Solutions' },
 
   // Hero
   heroGreeting: { ar: 'مرحباً، أنا', en: "Hi, I'm" },
