@@ -8,7 +8,7 @@ import { featuredProjects as projects } from '@/data/projects';
 import {
   ArrowUpRight,
   Bot,
-  BriefcaseBusiness,
+  Briefcase,
   Mail,
   MapPin,
   Phone,
@@ -46,7 +46,7 @@ const services = {
     {
       title: 'Build execution from concept to launch',
       desc: 'From architecture to final delivery across web products, automations, and niche tools.',
-      icon: BriefcaseBusiness,
+      icon: Briefcase,
     },
   ],
   ar: [
@@ -63,7 +63,7 @@ const services = {
     {
       title: 'تنفيذ كامل من الفكرة إلى الإطلاق',
       desc: 'من المعمارية إلى التسليم النهائي عبر المنتجات الرقمية والأتمتة والأدوات المتخصصة.',
-      icon: BriefcaseBusiness,
+      icon: Briefcase,
     },
   ],
 } as const;
