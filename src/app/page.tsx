@@ -147,7 +147,7 @@ export default function Home() {
 
             {/* Editorial Metrics Grid */}
             <div className="mt-16 grid gap-6 sm:grid-cols-3 w-full max-w-3xl">
-              {metrics[lang].map((item) => (
+              {metrics[lang as 'ar' | 'en'].map((item: { value: string; label: string }) => (
                 <div
                   key={item.label}
                   className="luxury-card p-6 text-center"
@@ -170,7 +170,7 @@ export default function Home() {
           transition={{ duration: 0.7 }}
           className="grid gap-6 lg:grid-cols-3"
         >
-          {services[lang].map((service) => {
+          {services[lang as 'ar' | 'en'].map((service: any) => {
             const Icon = service.icon;
             return (
               <article
