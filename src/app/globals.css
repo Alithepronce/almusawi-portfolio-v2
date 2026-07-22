@@ -3,38 +3,40 @@
 @tailwind utilities;
 
 :root {
-  --bg: #0f1110;
-  --bg-surface: #171a18;
-  --bg-elevated: #1e2220;
-  --accent: #c96f4a;
-  --accent-dark: #a04f31;
-  --accent-glow: rgba(201, 111, 74, 0.24);
-  --gold: #cab48b;
-  --gold-light: #e0cfa8;
-  --gold-glow: rgba(202, 180, 139, 0.12);
-  --text: #f5f1e8;
-  --text-secondary: rgba(245, 241, 232, 0.68);
-  --text-muted: rgba(245, 241, 232, 0.4);
-  --glass-bg: rgba(255, 255, 255, 0.04);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --radius: 18px;
+  --bg: #0B0C0E;
+  --bg-surface: #121417;
+  --bg-elevated: #1A1D22;
+  --accent: #D4AF37;
+  --accent-dark: #A3821A;
+  --accent-glow: rgba(212, 175, 55, 0.18);
+  --gold: #D4AF37;
+  --gold-light: #F0DA8A;
+  --gold-dark: #997A15;
+  --gold-glow: rgba(240, 218, 138, 0.12);
+  --text: #F8F6F0;
+  --text-secondary: rgba(248, 246, 240, 0.72);
+  --text-muted: rgba(248, 246, 240, 0.45);
+  --glass-bg: rgba(255, 255, 255, 0.025);
+  --glass-border: rgba(212, 175, 55, 0.15);
+  --radius: 24px;
 }
 
 .light {
-  --bg: #f6f0e5;
-  --bg-surface: #fffaf2;
-  --bg-elevated: #efe6d8;
-  --accent: #b85f3a;
-  --accent-dark: #944629;
-  --accent-glow: rgba(184, 95, 58, 0.14);
-  --gold: #8b7147;
-  --gold-light: #b39665;
-  --gold-glow: rgba(139, 113, 71, 0.1);
-  --text: #1f1d19;
-  --text-secondary: rgba(31, 29, 25, 0.72);
-  --text-muted: rgba(31, 29, 25, 0.46);
-  --glass-bg: rgba(255, 250, 242, 0.85);
-  --glass-border: rgba(31, 29, 25, 0.08);
+  --bg: #F5F3EC;
+  --bg-surface: #FCFAF4;
+  --bg-elevated: #EDE9DE;
+  --accent: #997A15;
+  --accent-dark: #6D560E;
+  --accent-glow: rgba(153, 122, 21, 0.12);
+  --gold: #997A15;
+  --gold-light: #B8972E;
+  --gold-dark: #6D560E;
+  --gold-glow: rgba(153, 122, 21, 0.08);
+  --text: #191815;
+  --text-secondary: rgba(25, 24, 21, 0.75);
+  --text-muted: rgba(25, 24, 21, 0.48);
+  --glass-bg: rgba(252, 250, 244, 0.85);
+  --glass-border: rgba(153, 122, 21, 0.12);
 }
 
 * {
@@ -51,41 +53,50 @@ html {
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: var(--font-arabic), var(--font-sans), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-cairo), var(--font-arabic), var(--font-sans), system-ui, -apple-system, sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
-.gold-gradient-text {
-  background: linear-gradient(135deg, var(--gold-light), var(--gold), #b8903a);
+/* Quiet Luxury Typography & Elements */
+.gold-luxury-text {
+  background: linear-gradient(135deg, #F0DA8A 0%, #D4AF37 50%, #A3821A 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.glass-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--glass-border);
+.luxury-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0%, rgba(255, 255, 255, 0.01) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(212, 175, 55, 0.15);
   border-radius: var(--radius);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.noise-bg {
-  background-image: radial-gradient(circle at 50% 0%, rgba(202, 180, 139, 0.15) 0%, transparent 60%),
-                    radial-gradient(circle at 80% 40%, rgba(225, 29, 72, 0.08) 0%, transparent 50%);
+.luxury-card:hover {
+  border-color: rgba(240, 218, 138, 0.35);
+  transform: translateY(-3px);
+  box-shadow: 0 20px 40px -15px rgba(212, 175, 55, 0.15);
 }
 
-/* Custom Scrollbar */
+.ambient-gold-glow {
+  background-image: 
+    radial-gradient(circle at 50% -10%, rgba(212, 175, 55, 0.16) 0%, transparent 50%),
+    radial-gradient(circle at 85% 40%, rgba(163, 130, 26, 0.08) 0%, transparent 40%);
+}
+
+/* Custom Luxury Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 ::-webkit-scrollbar-track {
   background: var(--bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(212, 175, 55, 0.25);
   border-radius: 99px;
 }
 ::-webkit-scrollbar-thumb:hover {
