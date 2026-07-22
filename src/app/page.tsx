@@ -13,9 +13,6 @@ import {
   MapPin,
   Phone,
   Sparkles,
-  Crown,
-  ShieldCheck,
-  Zap,
 } from 'lucide-react';
 import { useInteractiveSounds } from '@/hooks/useInteractiveSounds';
 
@@ -23,49 +20,49 @@ const containerClass = 'mx-auto w-full max-w-[1280px] px-5 sm:px-8 lg:px-12';
 
 const metrics = {
   en: [
-    { value: '1K+', label: 'active users launched in first month' },
-    { value: '7–14', label: 'days to ship end-to-end AI pipelines' },
-    { value: '4', label: 'production apps with 100% reliability' },
+    { value: '1K+', label: 'active users launched in one month' },
+    { value: '7-14', label: 'days to ship focused AI automations' },
+    { value: '4', label: 'case studies with tangible outcomes' },
   ],
   ar: [
-    { value: '+1K', label: 'مستخدم نشط خلال الشهر الأول' },
-    { value: '14–7', label: 'يومًا لتسليم أتمتة AI متكاملة' },
-    { value: '4', label: 'تطبيقات فعلية باستقرار واستجابة 100%' },
+    { value: '+1K', label: 'مستخدم نشط خلال أول شهر إطلاق' },
+    { value: '14-7', label: 'يومًا لتسليم أتمتة AI مركزة' },
+    { value: '4', label: 'دراسات حالة بنتائج واضحة' },
   ],
 } as const;
 
 const services = {
   en: [
     {
-      title: 'Autonomous AI Systems',
-      desc: 'Operational flows, support chatbots, content engines, and internal tools engineered around measurable speed.',
+      title: 'AI systems that remove manual drag',
+      desc: 'Operational flows, support, content, and internal tools designed around measurable speed.',
       icon: Bot,
     },
     {
-      title: 'Quiet Luxury UI/UX Design',
-      desc: 'Digital products crafted with calmer typography, stronger hierarchy, and an unmistakable editorial identity.',
+      title: 'Product design that feels deliberate',
+      desc: 'Interfaces with stronger hierarchy, calmer typography, and a clearer point of view.',
       icon: Sparkles,
     },
     {
-      title: 'iOS & Web Architecture',
-      desc: 'Full-stack delivery from concept to production across SwiftData, Next.js, and cloud backend infrastructure.',
+      title: 'Build execution from concept to launch',
+      desc: 'From architecture to final delivery across web products, automations, and niche tools.',
       icon: Briefcase,
     },
   ],
   ar: [
     {
-      title: 'أنظمة الذكاء الاصطناعي الذاتية',
-      desc: 'سير عمل تشغيلي، أنظمة دعم، محركات محتوى، وأدوات برمجية مبنية على أقصى معدلات السرعة.',
+      title: 'أنظمة AI تزيل الجهد اليدوي',
+      desc: 'سير عمل ودعم ومحتوى وأدوات داخلية مبنية على سرعة قابلة للقياس.',
       icon: Bot,
     },
     {
-      title: 'تصميم الواجهات بروح الفخامة الهادئة',
-      desc: 'واجهات رقمية تتميز بهرمية بصرية متزنة، خطوط راقية، وشخصية بصرية انطباعية مبهرة من اللمحة الأولى.',
+      title: 'تصميم منتج بموقف بصري أوضح',
+      desc: 'واجهات بهرمية أقوى وخطوط أهدأ وشخصية أكثر نضجًا.',
       icon: Sparkles,
     },
     {
-      title: 'معمارية تطبيقات iOS والويب',
-      desc: 'تنفيذ شامل من الفكرة والإنشاء حتى البث والإنتاج عبر SwiftUI و Next.js و Supabase.',
+      title: 'تنفيذ كامل من الفكرة إلى الإطلاق',
+      desc: 'من المعمارية إلى التسليم النهائي عبر المنتجات الرقمية والأتمتة والأدوات المتخصصة.',
       icon: Briefcase,
     },
   ],
@@ -79,81 +76,84 @@ export default function Home() {
   const copy = {
     label: isArabic ? 'علي الموسوي' : 'Ali Al-Musawi',
     title: isArabic
-      ? 'نصمّم النقاء، ونبني أتمتة AI تعمل بهدوء وقوة.'
-      : 'Crafting Pure Interfaces & Silent AI Automation.',
+      ? 'أبني منتجات رقمية وأتمتة AI تبدو أحدث وتعمل بوضوح.'
+      : 'I build digital products and AI automation that feel sharper and work harder.',
     body: isArabic
-      ? 'أساعد الشركات والفرق الصغيرة على تحويل الفوضى التشغيلية إلى أنظمة أسرع، وواجهات أنظف، وتجارب رقمية ذات طابع ملوكي يترك أثراً دائماً.'
-      : 'I help businesses and ambitious teams turn operational drag into silent systems, cleaner interfaces, and luxury digital products with lasting impact.',
-    primary: isArabic ? 'ابدأ مشروعاً جديداً' : 'Start a Project',
-    secondary: isArabic ? 'استكشف معرض الأعمال' : 'Explore Portfolio',
-    sectionTitle: isArabic ? 'مختارات هادئة من الأعمال' : 'Selected Quiet Luxury Works',
+      ? 'أساعد الشركات والفرق الصغيرة على تحويل الفوضى التشغيلية إلى أنظمة أسرع، وواجهات أنظف، وتجارب أكثر إقناعًا من أول نظرة.'
+      : 'I help businesses and small teams turn operational drag into faster systems, cleaner interfaces, and products that make a stronger first impression.',
+    primary: isArabic ? 'ابدأ مشروعًا' : 'Start a Project',
+    secondary: isArabic ? 'شاهد الأعمال' : 'See the Work',
+    sectionTitle: isArabic ? 'مختارات حديثة' : 'Recent Selected Work',
     sectionBody: isArabic
-      ? 'نماذج استثنائية تجسّد الاندماج بين التفكير الهندسي، الأتمتة المتقدمة، والتصميم الرفيع.'
-      : 'Exceptional showcases embodying the convergence of product engineering, AI automation, and high taste.',
-    contactTitle: isArabic ? 'إذا كان شكل الواجهة الحالي لا يكفي، نبني النسخة الفاخرة.' : 'If the current experience is not enough, we build the luxury version.',
+      ? 'نماذج توضّح كيف أجمع بين التفكير المنتجّي والتنفيذ التقني والهوية البصرية الحادة.'
+      : 'Examples that show how product thinking, technical delivery, and visual taste come together.',
+    contactTitle: isArabic ? 'إذا كان الشكل الحالي لا يكفي، نبني نسخة أفضل.' : 'If the current experience is not enough, we build the better version.',
     contactBody: isArabic
-      ? 'تطبيق iOS، منصة سحابية، أو نظام أتمتة: الهدف واحد وهو الوضوح التام، السرعة، والجمال الفائق.'
-      : 'iOS app, web platform, or AI pipeline: the goal is the same — absolute clarity, speed, and elegance.',
+      ? 'واجهة أو منتج أو نظام داخلي: المهم أن يكون أوضح، أسرع، وأجمل في الاستخدام.'
+      : 'Interface, product, or internal system: the goal is the same, clearer, faster, and better to use.',
   };
 
   return (
-    <main className="relative overflow-x-hidden pb-24 pt-32 text-[var(--text)] ambient-gold-glow">
+    <main className="relative overflow-x-hidden pb-20 pt-28 text-[var(--text)]">
+      {/* Glow Orbs Background */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[720px] bg-[radial-gradient(circle_at_top,rgba(202,180,139,0.18),transparent_42%),radial-gradient(circle_at_20%_30%,rgba(225,29,72,0.15),transparent_30%)]" />
+
       {/* HERO SECTION */}
       <section className={`${containerClass} relative z-10`}>
         <motion.div
-          initial={{ opacity: 0, y: 32 }}
+          initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="flex flex-col items-center justify-center text-center"
           dir={isArabic ? 'rtl' : 'ltr'}
         >
           <div className="max-w-4xl flex flex-col items-center">
             {/* Status Pill */}
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--gold)]/30 bg-black/40 px-5 py-2 text-xs font-bold tracking-wide text-[var(--gold-light)] backdrop-blur-xl shadow-lg">
-              <span className="h-2 w-2 rounded-full bg-[var(--gold)] animate-pulse" />
-              {isArabic ? 'علي الموسوي · مطوّر أتمتة AI ومدير منتجات' : 'Ali Al-Musawi · AI Automation Developer'}
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium text-[var(--text-secondary)] backdrop-blur">
+              <span className="h-2 w-2 rounded-full bg-[var(--gold)]" />
+              {isArabic ? 'مطوّر أتمتة AI ومدير منتجات' : 'AI Automation Developer and Product Manager'}
             </div>
 
-            {/* Main Headline */}
-            <h1 className="text-[clamp(2.6rem,6.8vw,5.5rem)] font-extrabold leading-[1.06] text-center tracking-tight gold-luxury-text">
+            {/* Title */}
+            <h1 className="text-[clamp(2.5rem,6.5vw,5.2rem)] font-extrabold leading-[1.08] text-center tracking-tight">
               {copy.title}
             </h1>
 
             {/* Subtitle */}
-            <p className="mt-7 max-w-2xl text-base leading-8 text-[var(--text-secondary)] sm:text-lg font-medium text-center">
+            <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--text-secondary)] sm:text-lg text-center">
               {copy.body}
             </p>
 
             {/* Action Buttons */}
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <Link
                 href="/contact"
                 onClick={playClick}
                 onMouseEnter={playHover}
-                className="inline-flex min-h-13 items-center gap-2.5 rounded-full bg-gradient-to-r from-[#F0DA8A] via-[#D4AF37] to-[#A3821A] px-8 py-4 text-sm font-extrabold text-[#0B0C0E] transition hover:scale-105 shadow-xl shadow-[var(--gold)]/20"
+                className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[var(--gold)] px-7 py-3.5 text-sm font-bold text-[#1f1d19] transition hover:scale-105 shadow-lg shadow-[var(--gold)]/20"
               >
                 {copy.primary}
-                <ArrowUpRight size={17} />
+                <ArrowUpRight size={16} />
               </Link>
               <Link
                 href="/work"
                 onClick={playClick}
                 onMouseEnter={playHover}
-                className="inline-flex min-h-13 items-center gap-2.5 rounded-full border border-[var(--gold)]/25 bg-white/5 px-8 py-4 text-sm font-bold text-[var(--text)] transition hover:border-[var(--gold)]/45 hover:bg-white/10 backdrop-blur-md"
+                className="inline-flex min-h-12 items-center gap-2 rounded-full border border-white/15 bg-white/5 px-7 py-3.5 text-sm font-bold text-[var(--text)] transition hover:border-white/30 hover:bg-white/10"
               >
                 {copy.secondary}
               </Link>
             </div>
 
-            {/* Editorial Metrics Grid */}
-            <div className="mt-16 grid gap-6 sm:grid-cols-3 w-full max-w-3xl">
-              {metrics[lang as 'ar' | 'en'].map((item: { value: string; label: string }) => (
+            {/* Metrics Grid */}
+            <div className="mt-14 grid gap-6 sm:grid-cols-3 w-full max-w-3xl">
+              {metrics[lang].map((item) => (
                 <div
                   key={item.label}
-                  className="luxury-card p-6 text-center"
+                  className="rounded-[24px] border border-white/10 bg-white/5 p-6 backdrop-blur-md shadow-xl"
                 >
-                  <div className="text-3xl font-extrabold gold-luxury-text">{item.value}</div>
-                  <p className="mt-2 text-xs font-semibold leading-5 text-[var(--text-secondary)]">{item.label}</p>
+                  <div className="text-3xl font-extrabold text-[var(--gold-light)]">{item.value}</div>
+                  <p className="mt-2 text-xs leading-5 text-[var(--text-secondary)]">{item.label}</p>
                 </div>
               ))}
             </div>
@@ -162,55 +162,53 @@ export default function Home() {
       </section>
 
       {/* SERVICES SECTION */}
-      <section className={`${containerClass} relative z-10 mt-32`} dir={isArabic ? 'rtl' : 'ltr'}>
+      <section className={`${containerClass} relative z-10 mt-28`} dir={isArabic ? 'rtl' : 'ltr'}>
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 22 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.7 }}
+          transition={{ duration: 0.65 }}
           className="grid gap-6 lg:grid-cols-3"
         >
-          {services[lang as 'ar' | 'en'].map((service: any) => {
+          {services[lang].map((service) => {
             const Icon = service.icon;
             return (
               <article
                 key={service.title}
-                className="luxury-card p-8 flex flex-col justify-between"
+                className="rounded-[28px] border border-white/10 bg-gradient-to-b from-white/5 to-white/0 p-8 backdrop-blur-md shadow-xl"
               >
-                <div>
-                  <div className="flex h-13 w-13 items-center justify-center rounded-2xl bg-[var(--gold)]/10 text-[var(--gold-light)] border border-[var(--gold)]/20 mb-6">
-                    <Icon size={24} />
-                  </div>
-                  <h2 className="text-2xl font-bold leading-tight mb-3">{service.title}</h2>
-                  <p className="text-sm leading-7 text-[var(--text-secondary)]">{service.desc}</p>
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--gold)]/10 text-[var(--gold-light)] border border-[var(--gold)]/20">
+                  <Icon size={22} />
                 </div>
+                <h2 className="mt-6 text-2xl font-bold leading-tight">{service.title}</h2>
+                <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">{service.desc}</p>
               </article>
             );
           })}
         </motion.div>
       </section>
 
-      {/* FEATURED SHOWCASE SECTION */}
-      <section className={`${containerClass} relative z-10 mt-36`} dir={isArabic ? 'rtl' : 'ltr'}>
+      {/* FEATURED WORK SECTION */}
+      <section className={`${containerClass} relative z-10 mt-32`} dir={isArabic ? 'rtl' : 'ltr'}>
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-100px' }}
-          transition={{ duration: 0.7 }}
+          transition={{ duration: 0.65 }}
           className="mb-12 flex flex-col gap-4 md:flex-row md:items-end md:justify-between"
         >
           <div className="max-w-2xl">
-            <p className="text-xs uppercase tracking-[0.25em] font-extrabold text-[var(--gold)]">{copy.sectionTitle}</p>
-            <h2 className="mt-3 text-4xl sm:text-5xl font-extrabold gold-luxury-text">{isArabic ? 'أعمال تتسم بالنقاء والجمال' : 'Pristine Digital Craftsmanship'}</h2>
+            <p className="text-xs uppercase tracking-[0.2em] font-bold text-[var(--gold)]">{copy.sectionTitle}</p>
+            <h2 className="mt-3 text-4xl font-extrabold">{isArabic ? 'أعمال تعكس الإبداع والاحترافية' : 'Work that reflects technical excellence'}</h2>
             <p className="mt-4 text-base leading-8 text-[var(--text-secondary)]">{copy.sectionBody}</p>
           </div>
           <Link
             href="/work"
             onClick={playClick}
             onMouseEnter={playHover}
-            className="inline-flex min-h-12 items-center gap-2 rounded-full border border-[var(--gold)]/25 px-7 py-3.5 text-sm font-bold text-[var(--text)] transition hover:border-[var(--gold)]/45 hover:bg-white/5"
+            className="inline-flex min-h-12 items-center gap-2 rounded-full border border-white/15 px-6 py-3 text-sm font-semibold text-[var(--text)] transition hover:border-white/30 hover:bg-white/5"
           >
-            {isArabic ? 'استعراض كافة الأعمال' : 'All Projects'}
+            {isArabic ? 'كل الأعمال' : 'All Projects'}
             <ArrowUpRight size={16} />
           </Link>
         </motion.div>
@@ -222,22 +220,21 @@ export default function Home() {
               initial={{ opacity: 0, y: 28 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-100px' }}
-              transition={{ duration: 0.6, delay: index * 0.08 }}
+              transition={{ duration: 0.55, delay: index * 0.08 }}
             >
               <Link
                 href={project.externalHref || `/work/${project.slug}`}
                 onClick={playClick}
                 onMouseEnter={playHover}
-                className="group block h-full luxury-card p-7"
+                className="group block h-full rounded-[28px] border border-white/10 bg-white/5 p-6 transition hover:border-white/25 hover:bg-white/10 shadow-xl"
               >
                 <div
                   className="mb-6 rounded-[22px] p-6 transition group-hover:scale-[1.02]"
                   style={{
-                    background: `linear-gradient(160deg, ${project.color}25, rgba(212, 175, 55, 0.03))`,
-                    border: `1px solid ${project.color}35`
+                    background: `linear-gradient(160deg, ${project.color}33, rgba(255,255,255,0.02))`,
                   }}
                 >
-                  <div className="text-xs font-bold tracking-wider text-[var(--gold)]">
+                  <div className="text-xs font-semibold text-[var(--text-secondary)]">
                     {project.year ?? (isArabic ? 'حديث' : 'Recent')}
                   </div>
                   <h3 className="mt-8 text-2xl font-bold leading-tight">
@@ -245,24 +242,24 @@ export default function Home() {
                   </h3>
                 </div>
 
-                <p className="text-sm leading-7 text-[var(--text-secondary)] line-clamp-3 mb-6">
+                <p className="text-sm leading-7 text-[var(--text-secondary)] line-clamp-3">
                   {isArabic ? project.desc.ar : project.desc.en}
                 </p>
 
-                <div className="flex flex-wrap gap-2 mb-6">
+                <div className="mt-5 flex flex-wrap gap-2">
                   {project.tags.slice(0, 3).map((tag) => (
                     <span
                       key={tag}
-                      className="rounded-full border border-[var(--gold)]/15 bg-white/5 px-3 py-1 text-xs font-semibold text-[var(--text-secondary)]"
+                      className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-[var(--text-secondary)]"
                     >
                       {tag}
                     </span>
                   ))}
                 </div>
 
-                <div className="inline-flex items-center gap-2 text-xs font-extrabold tracking-wide text-[var(--gold-light)] uppercase">
-                  {isArabic ? 'فتح الاستعراض والتفاصيل' : 'Open Case Study'}
-                  <ArrowUpRight size={15} className="transition group-hover:translate-x-0.5 group-hover:translate-y-[-1px]" />
+                <div className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-[var(--gold-light)]">
+                  {isArabic ? 'استكشف التفاصيل والسياسات' : 'Explore Details & Showcase'}
+                  <ArrowUpRight size={16} className="transition group-hover:translate-x-0.5 group-hover:translate-y-[-1px]" />
                 </div>
               </Link>
             </motion.div>
@@ -270,20 +267,20 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CONTACT CTA BANNER */}
-      <section className={`${containerClass} relative z-10 mt-36`} dir={isArabic ? 'rtl' : 'ltr'}>
+      {/* CONTACT CTA SECTION */}
+      <section className={`${containerClass} relative z-10 mt-32`} dir={isArabic ? 'rtl' : 'ltr'}>
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 22 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.7 }}
-          className="luxury-card grid gap-8 p-8 md:grid-cols-[1.2fr_0.8fr] md:p-12 shadow-2xl"
+          transition={{ duration: 0.65 }}
+          className="grid gap-8 rounded-[36px] border border-white/10 bg-gradient-to-br from-white/5 to-white/0 p-8 md:grid-cols-[1.2fr_0.8fr] md:p-12 backdrop-blur-xl shadow-2xl"
         >
           <div>
-            <p className="text-xs uppercase tracking-[0.25em] font-extrabold text-[var(--gold)]">
-              {isArabic ? 'تواصل مباشر وملوكي' : 'Direct Conversation'}
+            <p className="text-xs uppercase tracking-[0.2em] font-bold text-[var(--gold)]">
+              {isArabic ? 'تواصل مباشر' : 'Direct Contact'}
             </p>
-            <h2 className="mt-3 max-w-2xl text-3xl sm:text-4xl font-extrabold leading-tight gold-luxury-text">
+            <h2 className="mt-3 max-w-2xl text-3xl sm:text-4xl font-bold leading-tight">
               {copy.contactTitle}
             </h2>
             <p className="mt-4 max-w-2xl text-base leading-8 text-[var(--text-secondary)]">
@@ -294,10 +291,10 @@ export default function Home() {
                 href="/contact"
                 onClick={playClick}
                 onMouseEnter={playHover}
-                className="inline-flex min-h-12 items-center gap-2.5 rounded-full bg-gradient-to-r from-[#F0DA8A] via-[#D4AF37] to-[#A3821A] px-7 py-3.5 text-sm font-extrabold text-[#0B0C0E] transition hover:scale-105"
+                className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[var(--gold)] px-7 py-3.5 text-sm font-bold text-[#1f1d19] transition hover:scale-105"
               >
                 <Mail size={16} />
-                {isArabic ? 'أرسل تفاصيل مشروعك' : 'Send Brief'}
+                {isArabic ? 'أرسل تفاصيل مشروعك' : 'Send Project Brief'}
               </Link>
               <a
                 href="https://wa.me/9647767625001"
@@ -305,7 +302,7 @@ export default function Home() {
                 rel="noreferrer"
                 onClick={playClick}
                 onMouseEnter={playHover}
-                className="inline-flex min-h-12 items-center gap-2.5 rounded-full border border-[var(--gold)]/25 px-7 py-3.5 text-sm font-bold text-[var(--text)] transition hover:bg-white/5"
+                className="inline-flex min-h-12 items-center gap-2 rounded-full border border-white/15 px-7 py-3.5 text-sm font-bold text-[var(--text)] transition hover:bg-white/10"
               >
                 <Phone size={16} />
                 WhatsApp Direct
@@ -313,7 +310,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="grid gap-4 rounded-[24px] border border-[var(--gold)]/15 bg-black/30 p-6 backdrop-blur-md">
+          <div className="grid gap-4 rounded-[28px] border border-white/10 bg-black/20 p-6 backdrop-blur-md">
             <div className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
               <MapPin size={18} className="text-[var(--gold-light)]" />
               <span>{isArabic ? 'بابل، العراق' : 'Babil, Iraq'}</span>
@@ -326,26 +323,26 @@ export default function Home() {
               <Phone size={18} className="text-[var(--gold-light)]" />
               <span dir="ltr">+964 776 762 5001</span>
             </div>
-            <div className="mt-4 border-t border-[var(--gold)]/15 pt-4 text-xs leading-6 text-[var(--text-muted)]">
+            <div className="mt-4 border-t border-white/10 pt-4 text-xs leading-6 text-[var(--text-muted)]">
               {isArabic
-                ? 'التركيز الحالي: أتمتة الأنظمة، تطوير تطبيقات iOS المتقدمة، وبناء تجارب مستخدم ملوكية.'
-                : 'Current focus: Systems automation, advanced iOS apps, and quiet luxury experiences.'}
+                ? 'التركيز الحالي: أتمتة الأنظمة، تطوير تطبيقات iOS المتقدمة، وبناء تجارب مستخدم مبهرة.'
+                : 'Current focus: Systems automation, advanced iOS apps, and building luxury user experiences.'}
             </div>
           </div>
         </motion.div>
       </section>
 
       {/* FOOTER */}
-      <footer className={`${containerClass} relative z-10 mt-24`} dir={isArabic ? 'rtl' : 'ltr'}>
-        <div className="flex flex-col gap-4 border-t border-[var(--gold)]/15 py-9 text-sm text-[var(--text-muted)] md:flex-row md:items-center md:justify-between">
+      <footer className={`${containerClass} relative z-10 mt-20`} dir={isArabic ? 'rtl' : 'ltr'}>
+        <div className="flex flex-col gap-4 border-t border-white/10 py-8 text-sm text-[var(--text-muted)] md:flex-row md:items-center md:justify-between">
           <p>
             © {new Date().getFullYear()} {t('heroName', lang)} · {t('officeTitle', lang)}
           </p>
-          <div className="flex items-center gap-6 font-bold text-xs">
-            <a href="https://github.com/Alithepronce" target="_blank" rel="noreferrer" className="transition hover:text-[var(--gold-light)]">
+          <div className="flex items-center gap-6">
+            <a href="https://github.com/Alithepronce" target="_blank" rel="noreferrer" className="transition hover:text-[var(--text)]">
               GitHub
             </a>
-            <a href="https://wa.me/9647767625001" target="_blank" rel="noreferrer" className="transition hover:text-[var(--gold-light)]">
+            <a href="https://wa.me/9647767625001" target="_blank" rel="noreferrer" className="transition hover:text-[var(--text)]">
               WhatsApp
             </a>
           </div>

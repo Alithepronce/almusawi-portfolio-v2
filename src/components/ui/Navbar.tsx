@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useLang, t } from '@/lib/i18n';
-import { Globe, Menu, X, Sun, Moon, Volume2, VolumeX, Crown } from 'lucide-react';
+import { Globe, Menu, X, Sun, Moon, Volume2, VolumeX, Sparkles } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '@/store/useStore';
@@ -29,8 +29,8 @@ export default function Navbar() {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const isAudioEnabled = useStore((s: any) => s.isAudioEnabled);
-  const toggleAudio = useStore((s: any) => s.toggleAudio);
+  const isAudioEnabled = useStore((s) => s.isAudioEnabled);
+  const toggleAudio = useStore((s) => s.toggleAudio);
   const { playClick, playHover, playTheme } = useInteractiveSounds();
 
   useEffect(() => setMounted(true), []);
@@ -54,17 +54,17 @@ export default function Navbar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 px-4 py-3 sm:px-8 sm:py-4">
-      <div className="mx-auto flex max-w-[1280px] items-center justify-between rounded-full border border-[var(--gold)]/20 bg-black/60 px-6 py-3.5 backdrop-blur-2xl shadow-2xl">
+      <div className="mx-auto flex max-w-[1280px] items-center justify-between rounded-full border border-white/10 bg-black/40 px-5 py-3 backdrop-blur-md shadow-2xl">
         {/* BRAND LOGO */}
         <Link 
           href="/" 
           onClick={playClick}
-          className="flex items-center gap-3 font-extrabold text-base tracking-tight text-[var(--text)] transition hover:opacity-90"
+          className="flex items-center gap-3 font-bold text-lg tracking-tight text-[var(--text)] transition hover:opacity-90"
         >
-          <div className="relative h-9 w-9 overflow-hidden rounded-full border border-[var(--gold)]/40 p-0.5 shadow-md">
-            <Image src="/logo.png" alt="Ali Al-Musawi Logo" fill className="object-cover rounded-full" />
+          <div className="relative h-9 w-9 overflow-hidden rounded-full border border-white/20">
+            <Image src="/logo.png" alt="Ali Al-Musawi Logo" fill className="object-cover" />
           </div>
-          <span className="hidden sm:inline font-bold text-sm gold-luxury-text">
+          <span className="hidden sm:inline font-bold">
             {lang === 'ar' ? 'علي الموسوي' : 'Ali Al-Musawi'}
           </span>
         </Link>
@@ -79,15 +79,15 @@ export default function Navbar() {
                 href={item.href}
                 onClick={playClick}
                 onMouseEnter={playHover}
-                className={`relative px-3.5 py-1.5 text-xs font-bold transition-colors rounded-full ${
-                  isActive ? 'text-[var(--gold-light)]' : 'text-[var(--text-secondary)] hover:text-[var(--text)]'
+                className={`relative px-3.5 py-1.5 text-sm font-medium transition-colors rounded-full ${
+                  isActive ? 'text-[var(--gold-light)] font-semibold' : 'text-[var(--text-secondary)] hover:text-[var(--text)]'
                 }`}
               >
                 {t(item.labelKey, lang)}
                 {isActive && (
                   <motion.div
                     layoutId="activeNavTab"
-                    className="absolute inset-0 rounded-full bg-[var(--gold)]/10 border border-[var(--gold)]/25"
+                    className="absolute inset-0 rounded-full bg-white/10 border border-white/15"
                     transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -96,16 +96,16 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* CONTROLS */}
+        {/* CONTROLS (Lang, Theme, Audio, Mobile Toggle) */}
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Audio Toggle */}
           <button
             onClick={handleAudioToggle}
             onMouseEnter={playHover}
             aria-label="Toggle Audio"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--gold)]/20 bg-white/5 text-[var(--text-secondary)] transition hover:border-[var(--gold)]/40 hover:text-[var(--text)]"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[var(--text-secondary)] transition hover:border-white/20 hover:text-[var(--text)]"
           >
-            {isAudioEnabled ? <Volume2 size={15} className="text-[var(--gold-light)]" /> : <VolumeX size={15} />}
+            {isAudioEnabled ? <Volume2 size={16} className="text-[var(--gold-light)]" /> : <VolumeX size={16} />}
           </button>
 
           {/* Theme Toggle */}
@@ -114,9 +114,9 @@ export default function Navbar() {
               onClick={handleThemeToggle}
               onMouseEnter={playHover}
               aria-label="Toggle Theme"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--gold)]/20 bg-white/5 text-[var(--text-secondary)] transition hover:border-[var(--gold)]/40 hover:text-[var(--text)]"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[var(--text-secondary)] transition hover:border-white/20 hover:text-[var(--text)]"
             >
-              {isDark ? <Sun size={15} className="text-amber-300" /> : <Moon size={15} className="text-indigo-300" />}
+              {isDark ? <Sun size={16} className="text-amber-300" /> : <Moon size={16} className="text-indigo-400" />}
             </button>
           )}
 
@@ -124,9 +124,9 @@ export default function Navbar() {
           <button
             onClick={toggleLanguage}
             onMouseEnter={playHover}
-            className="flex items-center gap-1.5 rounded-full border border-[var(--gold)]/20 bg-white/5 px-3 py-1.5 text-xs font-bold text-[var(--text-secondary)] transition hover:border-[var(--gold)]/40 hover:text-[var(--text)]"
+            className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-[var(--text-secondary)] transition hover:border-white/20 hover:text-[var(--text)]"
           >
-            <Globe size={13} />
+            <Globe size={14} />
             <span>{t('switchLang', lang)}</span>
           </button>
 
@@ -134,9 +134,9 @@ export default function Navbar() {
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle Mobile Menu"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--gold)]/20 bg-white/5 text-[var(--text)] lg:hidden"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[var(--text)] lg:hidden"
           >
-            {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </div>
@@ -148,9 +148,9 @@ export default function Navbar() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="mt-3 rounded-3xl border border-[var(--gold)]/25 bg-black/95 p-6 backdrop-blur-2xl lg:hidden shadow-2xl"
+            className="mt-3 rounded-3xl border border-white/12 bg-black/90 p-6 backdrop-blur-2xl lg:hidden shadow-2xl"
           >
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-3">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
@@ -159,8 +159,8 @@ export default function Navbar() {
                     playClick();
                     setMobileMenuOpen(false);
                   }}
-                  className={`rounded-xl p-3 text-sm font-bold transition ${
-                    pathname === item.href ? 'bg-[var(--gold)]/15 text-[var(--gold-light)]' : 'text-[var(--text-secondary)] hover:bg-white/5'
+                  className={`rounded-xl p-3 text-base font-semibold transition ${
+                    pathname === item.href ? 'bg-white/10 text-[var(--gold-light)]' : 'text-[var(--text-secondary)] hover:bg-white/5'
                   }`}
                 >
                   {t(item.labelKey, lang)}
