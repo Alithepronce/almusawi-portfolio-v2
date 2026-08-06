@@ -1,32 +1,53 @@
 'use client';
 
-import { PhoneCall } from 'lucide-react';
+import PageShell from '@/components/ui/PageShell';
+import { PhoneCall, Mail, MessageSquare } from 'lucide-react';
 
 export default function GlamoraSupportPage() {
   return (
-    <div style={{ maxWidth: '900px', margin: '40px auto', padding: '0 20px 80px' }}>
-      <div style={{ padding: '40px', background: '#FFFFFF', borderRadius: '32px', border: '1px solid rgba(225, 29, 72, 0.15)', boxShadow: '0 20px 40px -15px rgba(0,0,0,0.05)', textAlign: 'center' }}>
-        <div style={{ width: '64px', height: '64px', background: 'rgba(225, 29, 72, 0.1)', borderRadius: '20px', color: '#E11D48', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-          <PhoneCall size={32} />
-        </div>
-
-        <h1 style={{ fontSize: '1.8rem', fontWeight: 800, margin: '0 0 10px', color: '#1C1917' }}>مركز الدعم والمساعدة الفنية المباشرة</h1>
-        <p style={{ fontSize: '1rem', color: '#78716C', maxWidth: '550px', margin: '0 auto 30px', lineHeight: 1.6 }}>
-          نحن هنا لدعمك وتلبية جميع استفساراتك حول تشغيل تطبيق Glamora، ربط أجهزة الكاشير، وإدارة التزامن السحابي.
-        </p>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px', textAlign: 'right' }}>
-          <div style={{ padding: '20px', borderRadius: '20px', background: '#FFF1F2', border: '1px solid rgba(225, 29, 72, 0.15)' }}>
-            <h4 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 6px', color: '#E11D48' }}>البريد الإلكتروني للدعم المباشر</h4>
-            <p style={{ fontSize: '0.9rem', color: '#44403C', margin: 0 }}>gamegdeo@gmail.com</p>
+    <PageShell>
+      <div className="max-w-4xl mx-auto pb-24 pt-4">
+        <div className="apple-studio-card p-8 sm:p-12 bg-white text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-black/5 text-[#e11d48] border border-black/8 mx-auto mb-6">
+            <PhoneCall size={28} />
           </div>
 
-          <div style={{ padding: '20px', borderRadius: '20px', background: '#FFF1F2', border: '1px solid rgba(225, 29, 72, 0.15)' }}>
-            <h4 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 6px', color: '#E11D48' }}>الاستفسارات والمساعدة</h4>
-            <p style={{ fontSize: '0.9rem', color: '#44403C', margin: 0 }}>متاح 24/7 لمساعدة أصحاب المحلات</p>
+          <h1 className="text-3xl font-extrabold text-[#1d1d1f] mb-3">الدعم الفني والخدمات (Glamora Support)</h1>
+          <p className="text-sm text-[#515154] max-w-xl mx-auto mb-10">
+            فريق الدعم الفني متواجد لمساعدتك في إعداد وتكوين أجهزة الكاشير والمطابع الحرارية واقتران أجهزة الموظفين عبر الـ QR Code.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-right max-w-2xl mx-auto">
+            <a
+              href="https://wa.me/9647767625001"
+              target="_blank"
+              rel="noreferrer"
+              className="apple-studio-card p-6 flex items-center gap-4 hover:border-[#0066cc] transition"
+            >
+              <div className="w-10 h-10 rounded-xl bg-black/5 text-[#10b981] flex items-center justify-center border border-black/8 shrink-0">
+                <MessageSquare size={20} />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-[#1d1d1f]">واتساب الدعم الفني</h3>
+                <p className="text-xs text-[#515154]" dir="ltr">+964 776 762 5001</p>
+              </div>
+            </a>
+
+            <a
+              href="mailto:gamegdeo@gmail.com"
+              className="apple-studio-card p-6 flex items-center gap-4 hover:border-[#0066cc] transition"
+            >
+              <div className="w-10 h-10 rounded-xl bg-black/5 text-[#0066cc] flex items-center justify-center border border-black/8 shrink-0">
+                <Mail size={20} />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-[#1d1d1f]">البريد الإلكتروني</h3>
+                <p className="text-xs text-[#515154]">gamegdeo@gmail.com</p>
+              </div>
+            </a>
           </div>
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 }

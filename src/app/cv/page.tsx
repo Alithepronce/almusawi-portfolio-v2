@@ -1,11 +1,18 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useLang } from '@/lib/i18n';
+import Link from 'next/link';
 import PageShell from '@/components/ui/PageShell';
-import { Download, Briefcase, GraduationCap, Award, MapPin, Mail, Phone, Sparkles, CheckCircle2 } from 'lucide-react';
+import { useLang } from '@/lib/i18n';
 import { experienceTimeline } from '@/data/experience';
+import { Briefcase, Download, MapPin, Mail, Phone, Code2, Sparkles, CheckCircle2, ArrowUpRight } from 'lucide-react';
 import { useInteractiveSounds } from '@/hooks/useInteractiveSounds';
+
+const coreSkills = [
+  { category: { ar: 'تطوير الأجهزة المحمولة', en: 'Mobile Architecture' }, skills: ['iOS (SwiftUI)', 'Flutter & Dart', 'CoreMotion', 'Face ID Enclave'] },
+  { category: { ar: 'الذكاء الاصطناعي والأتمتة', en: 'AI & Systems Automation' }, skills: ['Python Automations', 'Supabase Realtime', 'Local-First Privacy', 'REST & GraphQL'] },
+  { category: { ar: 'التصميم وتجربة المستخدم', en: 'Product & HIG Design' }, skills: ['Apple HIG Standards', 'Liquid Glass UI', 'Bento Architecture', 'Framer Motion'] },
+];
 
 export default function CVPage() {
   const { lang } = useLang();
@@ -14,114 +21,93 @@ export default function CVPage() {
 
   return (
     <PageShell>
-      <div className="max-w-4xl mx-auto pb-24">
+      <div className="max-w-4xl mx-auto pb-24 pt-4">
         {/* HERO HEADER */}
-        <section className="text-center mb-12">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-[var(--gold-light)] mb-4"
-          >
-            <Sparkles size={14} />
-            {isRtl ? 'السيرة الذاتية الرسمية' : 'Official Curriculum Vitae'}
-          </motion.div>
+        <section className="glass-card-apple p-8 sm:p-12 mb-12 bento-zmam">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-3.5 py-1 text-xs font-bold text-purple-300 mb-4">
+                <Sparkles size={14} />
+                <span>{isRtl ? 'السيرة الذاتية المهنية' : 'Executive Resume'}</span>
+              </div>
+              <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-2">
+                {isRtl ? 'علي موفق' : 'Ali Muwaffaq'}
+              </h1>
+              <p className="text-base text-purple-300 font-bold mb-4">
+                {isRtl ? 'مؤسس ومعمار أنظمة — منظومة مشروع زمام' : 'Founder & System Architect — Project ZMAM Ecosystem'}
+              </p>
+              <div className="flex flex-wrap gap-4 text-xs text-neutral-400">
+                <span className="flex items-center gap-1.5"><MapPin size={14} className="text-purple-400" /> {isRtl ? 'بابل، العراق' : 'Babil, Iraq'}</span>
+                <span className="flex items-center gap-1.5"><Mail size={14} className="text-purple-400" /> gamegdeo@gmail.com</span>
+                <span className="flex items-center gap-1.5"><Phone size={14} className="text-purple-400" /> <span dir="ltr">+964 776 762 5001</span></span>
+              </div>
+            </div>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-4xl font-extrabold sm:text-5xl"
-          >
-            {isRtl ? 'علي الموسوي' : 'Ali Al-Musawi'}
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mt-3 text-lg font-semibold text-[var(--gold-light)]"
-          >
-            {isRtl ? 'مطور أتمتة الذكاء الاصطناعي ومدير المنتجات' : 'AI Automation Developer & Product Manager'}
-          </motion.p>
-
-          {/* Download Buttons */}
-          <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <a
-              href="/cv-ar.pdf"
-              download
-              onClick={playClick}
-              onMouseEnter={playHover}
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-[var(--gold)] text-[#1f1d19] font-bold text-sm transition hover:scale-105 shadow-lg"
-            >
-              <Download size={18} />
-              {isRtl ? 'تحميل السيرة الذاتية (عربي PDF)' : 'Download Arabic CV (PDF)'}
-            </a>
-            <a
-              href="/cv-en.pdf"
-              download
-              onClick={playClick}
-              onMouseEnter={playHover}
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full border border-white/15 bg-white/5 text-[var(--text)] font-bold text-sm transition hover:bg-white/10"
-            >
-              <Download size={18} />
-              {isRtl ? 'تحميل السيرة الذاتية (English PDF)' : 'Download English CV (PDF)'}
-            </a>
+            <div className="shrink-0">
+              <a
+                href="mailto:gamegdeo@gmail.com?subject=طلب%20السيرة%20الذاتية"
+                onClick={playClick}
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-sm shadow-xl shadow-purple-500/20 hover:scale-105 transition"
+              >
+                <Download size={16} />
+                <span>{isRtl ? 'تواصل للحصول على النسخة المطبوعة' : 'Contact for Printable Resume'}</span>
+              </a>
+            </div>
           </div>
         </section>
 
-        {/* BIO & SUMMARY */}
-        <section className="mb-10 rounded-[32px] border border-white/10 bg-white/5 p-8 backdrop-blur-xl shadow-2xl">
-          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-[var(--gold-light)]">
-            <Briefcase size={22} />
-            {isRtl ? 'الملخص المهني' : 'Professional Summary'}
+        {/* SKILLS MATRIX */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold text-white tracking-tight mb-6">
+            {isRtl ? 'المهارات والخبرات التقنية' : 'Core Competencies'}
           </h2>
-          <p className="text-base text-[var(--text-secondary)] leading-8">
-            {isRtl
-              ? 'مطور أتمتة ذكاء اصطناعي ومدير منتجات من بابل، العراق. أتمتع بخبرة واسعة في بناء النظم البرمجية المعقدة، تطوير تطبيقات iOS بلغة SwiftUI، وتصميم خطوط أنابيب أتمتة AI تقلل الوقت والجهد اليدوي بنسب تتجاوز 60%.'
-              : 'AI Automation Developer & Product Manager based in Babil, Iraq. Experienced in engineering complex software systems, iOS app development with SwiftUI, and designing AI automation pipelines reducing manual friction by over 60%.'}
-          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {coreSkills.map((cat, i) => (
+              <div key={i} className="glass-card-apple p-6">
+                <h3 className="text-sm font-bold text-purple-300 mb-4 pb-2 border-b border-white/10">{cat.category[lang]}</h3>
+                <ul className="space-y-2 text-xs text-neutral-300 font-medium">
+                  {cat.skills.map((s) => (
+                    <li key={s} className="flex items-center gap-2">
+                      <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
+                      <span>{s}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* EXPERIENCE TIMELINE */}
-        <section className="mb-10 rounded-[32px] border border-white/10 bg-white/5 p-8 backdrop-blur-xl shadow-2xl">
-          <h2 className="text-2xl font-bold mb-8 flex items-center gap-2 text-[var(--gold-light)]">
-            <Award size={22} />
-            {isRtl ? 'الخبرات والمناصب' : 'Experience & Leadership'}
+        <section>
+          <h2 className="text-2xl font-bold text-white tracking-tight mb-6">
+            {isRtl ? 'الخبرات والمسار المهني' : 'Professional Experience'}
           </h2>
-
-          <div className="grid gap-6">
-            {experienceTimeline.map((item, index) => {
-              const Icon = item.icon;
+          <div className="space-y-6">
+            {experienceTimeline.map((exp, index) => {
+              const Icon = exp.icon;
               return (
-                <div key={index} className="flex gap-4 p-5 rounded-2xl border border-white/10 bg-black/20">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl" style={{ background: `${item.color}20`, color: item.color }}>
-                    <Icon size={24} />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-[var(--gold)]">{item.year}</span>
-                    <h3 className="text-xl font-bold">{isRtl ? item.title.ar : item.title.en}</h3>
-                    <p className="text-sm text-[var(--text-secondary)] mt-1">{isRtl ? item.company.ar : item.company.en}</p>
+                <div key={index} className="glass-card-apple p-8 bento-zmam">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center border border-white/10 shrink-0"
+                        style={{ background: `${exp.color}20`, color: exp.color }}
+                      >
+                        <Icon size={20} />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-white">{exp.title[lang]}</h3>
+                        <p className="text-xs text-purple-300 font-semibold">{exp.company[lang]}</p>
+                      </div>
+                    </div>
+                    <span className="px-3 py-1 rounded-full border border-white/10 bg-white/5 text-xs text-neutral-400 font-semibold w-fit">
+                      {exp.year}
+                    </span>
                   </div>
                 </div>
               );
             })}
-          </div>
-        </section>
-
-        {/* EDUCATION */}
-        <section className="rounded-[32px] border border-white/10 bg-white/5 p-8 backdrop-blur-xl shadow-2xl">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-[var(--gold-light)]">
-            <GraduationCap size={22} />
-            {isRtl ? 'التعليم الأكاديمي' : 'Education'}
-          </h2>
-          <div className="p-6 rounded-2xl border border-white/10 bg-black/20">
-            <span className="text-xs font-bold text-emerald-400">2021 – 2025</span>
-            <h3 className="text-xl font-bold mt-1">
-              {isRtl ? 'بكالوريوس فيزياء طبية — جامعة المستقبل' : 'B.Sc. Medical Physics — Al-Mustaqbal University'}
-            </h3>
-            <p className="text-sm text-[var(--text-secondary)] mt-2">
-              {isRtl ? 'المعدل: 70% | مشروع التخرج: روبوت توصيل الأدوية الطبي بالأشعة تحت الحمراء.' : 'GPA: 70% | Graduation Project: Autonomous Medical Drug Delivery IR Robot.'}
-            </p>
           </div>
         </section>
       </div>

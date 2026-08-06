@@ -21,22 +21,23 @@ const cairo = Cairo({
 });
 
 export const metadata: Metadata = {
-  title: 'Ali Al-Musawi | AI Automation Developer & Product Manager',
+  title: 'علي موفق | مشروع زمام (Project ZMAM)',
   description:
-    'Portfolio of Ali Al-Musawi — AI Automation Developer & Product Manager from Babil, Iraq. شركة ومكتب الموسوي للحلول البرمجية.',
+    'المنظومة الرقمية لمشروع زمام — علي موفق: معمار أنظمة ومطور حلول تقنية موثوقة من بابل، العراق.',
   keywords: [
-    'Ali Al-Musawi',
-    'علي الموسوي',
-    'AI Developer',
-    'Product Manager',
-    'مكتب الموسوي',
-    'Portfolio',
+    'Ali Muwaffaq',
+    'علي موفق',
+    'مشروع زمام',
+    'Project ZMAM',
+    'ZMAM Ecosystem',
+    'Warraq',
+    'Glamora',
     'Babil',
     'Iraq',
   ],
   openGraph: {
-    title: 'Ali Al-Musawi | AI Automation Developer',
-    description: 'AI Automation Developer & Product Manager — Babil, Iraq',
+    title: 'علي موفق | منظومة مشروع زمام ZMAM Ecosystem',
+    description: 'معمار أنظمة ومؤسس مشروع زمام — تكنولوجيا موثوقة تحترم الإنسان',
     type: 'website',
     locale: 'ar_IQ',
     alternateLocale: 'en_US',

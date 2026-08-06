@@ -1,19 +1,60 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Image from 'next/image';
-import { useLang } from '@/lib/i18n';
+import Link from 'next/link';
 import PageShell from '@/components/ui/PageShell';
-import { Phone, Mail, Globe, Github, Crown, Activity, Printer, ArrowUpRight } from 'lucide-react';
+import { useLang } from '@/lib/i18n';
+import {
+  Layers,
+  Printer,
+  Crown,
+  Github,
+  MessageSquare,
+  ArrowUpRight,
+} from 'lucide-react';
 import { useInteractiveSounds } from '@/hooks/useInteractiveSounds';
 
-const links = [
-  { label: 'تطبيق غلامورا (Glamora POS)', href: '/glamora', icon: Crown, color: '#E11D48' },
-  { label: 'تطبيق خُطى (GlassStep)', href: '/khuta', icon: Activity, color: '#06B6D4' },
-  { label: 'منصة الوَرَّاق للطباعة', href: '/warraq', icon: Printer, color: '#D97706' },
-  { label: 'موقع شركة الموسوي', href: '/office', icon: Globe, color: '#8B5CF6' },
-  { label: 'حساب GitHub الرسمي', href: 'https://github.com/Alithepronce', icon: Github, color: '#10B981' },
-  { label: 'تواصل مباشر عبر WhatsApp', href: 'https://wa.me/9647767625001', icon: Phone, color: '#25D366' },
+const linkItems = [
+  {
+    title: { ar: 'دستور مشروع زمام (ZMAM Doctrine)', en: 'Project ZMAM Constitution' },
+    subtitle: { ar: 'الإعلان التأسيسي والأعمدة الاستراتيجية', en: 'Founding Declaration & Pillars' },
+    href: '/zemam',
+    color: '#6366f1',
+    icon: Layers,
+    isExternal: false,
+  },
+  {
+    title: { ar: 'منصة الوَرَّاق (Warraq Publishing)', en: 'Warraq Print & Document Ecosystem' },
+    subtitle: { ar: 'إدارة المطابع الذكية ونشر المستندات', en: 'Smart Print Shop & Document Logistics' },
+    href: '/warraq',
+    color: '#d97706',
+    icon: Printer,
+    isExternal: false,
+  },
+  {
+    title: { ar: 'تطبيق جلامورا (Glamora POS)', en: 'Glamora POS & HR System' },
+    subtitle: { ar: 'نظام إدارة كاشير ومخزون المحلات بـ Face ID', en: 'Luxury Retail POS & HR Engine' },
+    href: '/glamora',
+    color: '#e11d48',
+    icon: Crown,
+    isExternal: false,
+  },
+  {
+    title: { ar: 'مستودع الكود (GitHub)', en: 'GitHub Repository' },
+    subtitle: { ar: 'المشاريع الحرة وتجارب التطوير', en: 'Open Source Projects & Systems' },
+    href: 'https://github.com/Alithepronce',
+    color: '#0066cc',
+    icon: Github,
+    isExternal: true,
+  },
+  {
+    title: { ar: 'المحادثات المباشرة (WhatsApp)', en: 'WhatsApp Direct Contact' },
+    subtitle: { ar: 'تواصل مباشر وسريع', en: 'Direct Instant Messaging' },
+    href: 'https://wa.me/9647767625001',
+    color: '#10b981',
+    icon: MessageSquare,
+    isExternal: true,
+  },
 ];
 
 export default function LinksPage() {
@@ -23,35 +64,82 @@ export default function LinksPage() {
 
   return (
     <PageShell>
-      <div className="max-w-md mx-auto text-center pb-24">
-        <div className="relative h-24 w-24 mx-auto mb-4 overflow-hidden rounded-full border-2 border-[var(--gold)] shadow-xl">
-          <Image src="/logo.png" alt="Ali Al-Musawi Logo" fill className="object-cover" />
-        </div>
+      <div className="max-w-3xl mx-auto pb-24 pt-4">
+        {/* AVATAR & HEADER */}
+        <section className="text-center mb-12">
+          <div className="w-20 h-20 rounded-full mx-auto mb-4 bg-[#1d1d1f] text-white flex items-center justify-center shadow-lg font-black text-2xl">
+            ZM
+          </div>
 
-        <h1 className="text-2xl font-extrabold mb-1">{isRtl ? 'علي الموسوي' : 'Ali Al-Musawi'}</h1>
-        <p className="text-xs font-semibold text-[var(--gold-light)] mb-8">
-          {isRtl ? 'مطوّر أتمتة AI ومدير منتجات | شركة الموسوي' : 'AI Automation Developer & Product Manager'}
-        </p>
+          <h1 className="text-3xl font-extrabold text-[#1d1d1f] mb-1">
+            {isRtl ? 'علي موفق' : 'Ali Muwaffaq'}
+          </h1>
+          <p className="text-sm text-[#0066cc] font-bold mb-2">
+            {isRtl ? 'مؤسس ومعمار أنظمة — منظومة مشروع زمام' : 'Founder & System Architect — Project ZMAM Ecosystem'}
+          </p>
+          <p className="text-xs text-[#515154] max-w-md mx-auto">
+            {isRtl ? 'بابل، العراق • تكنولوجيا موثوقة تحترم الإنسان' : 'Babil, Iraq • Building Trustworthy Technology'}
+          </p>
+        </section>
 
-        <div className="grid gap-3">
-          {links.map((link, index) => {
-            const Icon = link.icon;
+        {/* LINK CARDS */}
+        <div className="space-y-4">
+          {linkItems.map((item, i) => {
+            const Icon = item.icon;
             return (
-              <a
-                key={index}
-                href={link.href}
-                onClick={playClick}
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.06 }}
                 onMouseEnter={playHover}
-                className="flex items-center justify-between p-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md transition hover:scale-[1.02] hover:border-white/25 shadow-lg"
               >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: `${link.color}20`, color: link.color }}>
-                    <Icon size={20} />
-                  </div>
-                  <span className="text-sm font-bold text-[var(--text)]">{link.label}</span>
-                </div>
-                <ArrowUpRight size={18} className="text-[var(--text-muted)]" />
-              </a>
+                {item.isExternal ? (
+                  <a
+                    href={item.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={playClick}
+                    className="apple-studio-card p-5 flex items-center justify-between group transition"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div
+                        className="w-12 h-12 rounded-2xl flex items-center justify-center bg-black/5 text-[#1d1d1f] border border-black/8 shrink-0"
+                      >
+                        <Icon size={22} />
+                      </div>
+                      <div>
+                        <h3 className="text-base font-bold text-[#1d1d1f] group-hover:text-[#0066cc] transition">
+                          {item.title[lang]}
+                        </h3>
+                        <p className="text-xs text-[#515154]">{item.subtitle[lang]}</p>
+                      </div>
+                    </div>
+                    <ArrowUpRight size={18} className="text-[#86868b] group-hover:text-[#0066cc] transition shrink-0" />
+                  </a>
+                ) : (
+                  <Link
+                    href={item.href}
+                    onClick={playClick}
+                    className="apple-studio-card p-5 flex items-center justify-between group transition"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div
+                        className="w-12 h-12 rounded-2xl flex items-center justify-center bg-black/5 text-[#1d1d1f] border border-black/8 shrink-0"
+                      >
+                        <Icon size={22} />
+                      </div>
+                      <div>
+                        <h3 className="text-base font-bold text-[#1d1d1f] group-hover:text-[#0066cc] transition">
+                          {item.title[lang]}
+                        </h3>
+                        <p className="text-xs text-[#515154]">{item.subtitle[lang]}</p>
+                      </div>
+                    </div>
+                    <ArrowUpRight size={18} className="text-[#86868b] group-hover:text-[#0066cc] transition shrink-0" />
+                  </Link>
+                )}
+              </motion.div>
             );
           })}
         </div>

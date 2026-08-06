@@ -11,10 +11,10 @@ export interface ExperienceItem {
 export const experienceTimeline: ExperienceItem[] = [
   {
     year: '2024–Present',
-    title: { en: 'Founder & CEO', ar: 'مؤسس ومدير تنفيذي' },
-    company: { en: 'Al-Musawi Coding Solutions', ar: 'شركة الموسوي للحلول البرمجية' },
+    title: { en: 'Founder & System Architect', ar: 'مؤسس ومعمار أنظمة' },
+    company: { en: 'Project ZMAM Ecosystem', ar: 'منظومة مشروع زمام التقنية' },
     icon: Briefcase,
-    color: '#DC143C',
+    color: '#8B5CF6',
   },
   {
     year: '2024–Present',

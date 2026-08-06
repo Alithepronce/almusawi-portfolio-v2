@@ -582,7 +582,7 @@ export default function CustomerPremiumPage() {
                         <input 
                           type="text" 
                           className="w-input" 
-                          placeholder="مثال: علي الموسوي"
+                          placeholder="مثال: علي موفق"
                           value={customerName}
                           onChange={e => setCustomerName(e.target.value)}
                           required

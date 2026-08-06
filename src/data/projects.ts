@@ -23,16 +23,7 @@ export const allProjects: Project[] = [
     hasCase: true,
     externalHref: '/glamora',
   },
-  {
-    slug: 'khuta',
-    title: { ar: 'تطبيق خُطى / GlassStep', en: 'Khuta / GlassStep App' },
-    desc: { ar: 'تطبيق تتبع خطوات زجاجي فائق الدقة ويعمل محلياً 100% مع 3 أنظمة حركية وأوسمة إنجاز', en: 'Liquid glass step tracker operating 100% locally with 3 tactical movement modes and achievement badges' },
-    tags: ['SwiftUI', 'CoreMotion', 'Apple Health', 'iOS'],
-    color: '#06B6D4',
-    year: '2026',
-    hasCase: true,
-    externalHref: '/khuta',
-  },
+
   {
     slug: 'trado',
     title: { ar: 'منصة ترادو / ise.trading', en: 'Trado / ise.trading Platform' },

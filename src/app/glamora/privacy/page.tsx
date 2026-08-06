@@ -1,42 +1,45 @@
 'use client';
 
+import PageShell from '@/components/ui/PageShell';
 import { ShieldCheck } from 'lucide-react';
 
 export default function GlamoraPrivacyPage() {
   return (
-    <div style={{ maxWidth: '900px', margin: '40px auto', padding: '0 20px 80px' }}>
-      <div style={{ padding: '40px', background: '#FFFFFF', borderRadius: '32px', border: '1px solid rgba(225, 29, 72, 0.15)', boxShadow: '0 20px 40px -15px rgba(0,0,0,0.05)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '24px' }}>
-          <div style={{ padding: '12px', background: 'rgba(225, 29, 72, 0.1)', borderRadius: '16px', color: '#E11D48' }}>
-            <ShieldCheck size={28} />
+    <PageShell>
+      <div className="max-w-4xl mx-auto pb-24 pt-4">
+        <div className="apple-studio-card p-8 sm:p-12 bg-white">
+          <div className="flex items-center gap-4 mb-8 pb-6 border-b border-black/10">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-black/5 text-[#e11d48] border border-black/8">
+              <ShieldCheck size={28} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-extrabold text-[#1d1d1f]">سياسة الخصوصية وحماية البيانات (Glamora POS Privacy Policy)</h1>
+              <p className="text-xs text-[#86868b]">منظومة مشروع زمام · تاريخ التحديث: أغسطس 2026</p>
+            </div>
           </div>
-          <div>
-            <h1 style={{ fontSize: '1.8rem', fontWeight: 800, margin: 0, color: '#1C1917' }}>سياسة الخصوصية وحماية البيانات (Privacy Policy)</h1>
-            <p style={{ fontSize: '0.85rem', color: '#78716C', margin: 0 }}>تاريخ التحديث: يوليو 2026</p>
+
+          <div className="space-y-6 text-sm text-[#515154] leading-relaxed">
+            <p>
+              نحن في <strong>تطبيق جلامورا (Glamora POS)</strong> نلتزم بأعلى معايير الحماية والسرية التامة لبيانات محلك ومبيعاتك وقواعد بيانات الموظفين والمخزون.
+            </p>
+
+            <h3 className="text-base font-bold text-[#1d1d1f] pt-2">1. جمع البيانات واستخدامها</h3>
+            <p>
+              تطبيق Glamora لا يقوم ببيع أو مشاركة أي من بيانات محلك، المبيعات، الفواتير، أو الرواتب مع أي طرف ثالث على الإطلاق. تُحفظ البيانات محلياً على جهازك وتتزامن سحابياً وبشكل مشفر حصرياً بين أجهزة محلك الخاصة عبر خوادم Supabase Realtime.
+            </p>
+
+            <h3 className="text-base font-bold text-[#1d1d1f] pt-2">2. الأمان والحماية الحيوية (Face ID / PIN)</h3>
+            <p>
+              تُستخدم بصمة الوجه (Apple Face ID) أو رمز PIN للتحقق المحلي من هوية المدير وصاحب المحل فقط داخل الجهاز، ولا يتم حفظ البيانات البيومترية خارج أجهزة أبل الرسمية.
+            </p>
+
+            <h3 className="text-base font-bold text-[#1d1d1f] pt-2">3. صلاحيات الكاميرا والمعرض</h3>
+            <p>
+              تُطلب صلاحية الكاميرا حصرياً لمسح باركود المنتجات ورمز الـ QR الخاص باقتران أجهزة الموظفين، بينما تُطلب صلاحية الصور فقط عند اختيار شعار المحل.
+            </p>
           </div>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', color: '#44403C', lineHeight: 1.7, fontSize: '0.95rem' }}>
-          <p>
-            نحن في <strong>تطبيق غلامورا (Glamora)</strong> نلتزم بأعلى معايير الحماية والسرية التامة لبيانات محلك ومبيعاتك وقواعد بيانات الموظفين والمخزون.
-          </p>
-
-          <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#E11D48', margin: '10px 0 0' }}>1. جمع البيانات واستخدامها</h3>
-          <p>
-            تطبيق Glamora لا يقوم ببيع أو مشاركة أي من بيانات محلك، المبيعات، الفواتير، أو الرواتب مع أي طرف ثالث على الإطلاق. تُحفظ البيانات محلياً على جهازك باستخدام تقنية <code>SwiftData</code> وتتزامن سحابياً وبشكل مشفر حصرياً بين أجهزة محلك الخاصة عبر خوادم <code>Supabase Realtime</code>.
-          </p>
-
-          <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#E11D48', margin: '10px 0 0' }}>2. الأمان والحماية الحيوية (Face ID / Touch ID)</h3>
-          <p>
-            تُستخدم بصمة الوجه (Face ID) أو رمز PIN للتحقق المحلي من هوية المدير وصاحب المحل فقط داخل الجهاز، ولا يتم حفظ البيانات البيومترية خارج أجهزة أبل الرسمية.
-          </p>
-
-          <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#E11D48', margin: '10px 0 0' }}>3. صلاحيات الكاميرا والمعرض</h3>
-          <p>
-            تُطلب صلاحية الكاميرا حصرياً لمسح باركود المنتجات ورمز الـ QR الخاص باقتران أجهزة الموظفين، بينما تُطلب صلاحية الصور فقط عند اختيار شعار المحل.
-          </p>
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 }

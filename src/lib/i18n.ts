@@ -7,47 +7,49 @@ export type Lang = 'ar' | 'en';
 export const translations = {
   // Navigation
   home: { ar: 'الرئيسية', en: 'Home' },
-  work: { ar: 'أعمالي', en: 'Work' },
+  work: { ar: 'المشاريع', en: 'Projects' },
   cv: { ar: 'السيرة الذاتية', en: 'CV' },
-  office: { ar: 'مكتب الموسوي', en: 'Al-Musawi Office' },
   apps: { ar: 'التطبيقات', en: 'Apps' },
+  zemam: { ar: 'مشروع زمام', en: 'Project ZMAM' },
+  warraq: { ar: 'وراق', en: 'Warraq' },
+  glamora: { ar: 'جلامورا', en: 'Glamora' },
   blog: { ar: 'المدونة', en: 'Blog' },
   contact: { ar: 'تواصل', en: 'Contact' },
   guestbook: { ar: 'سجل الزوار', en: 'Guestbook' },
   links: { ar: 'الروابط', en: 'Links' },
-  officeTitle: { ar: 'مكتب الموسوي للطباعة والحلول البرمجية', en: 'Al-Musawi Office for Printing & Software Solutions' },
 
   // Hero
   heroGreeting: { ar: 'مرحباً، أنا', en: "Hi, I'm" },
-  heroName: { ar: 'علي الموسوي', en: 'Ali Al-Musawi' },
-  heroRole: { ar: 'مطور أتمتة AI ومدير منتجات', en: 'AI Automation Developer & Product Manager' },
+  heroName: { ar: 'علي موفق', en: 'Ali Muwaffaq' },
+  heroRole: { ar: 'معمار أنظمة ومؤسس مشروع زمام الرقمي', en: 'System Architect & Founder of Project ZMAM' },
+  heroSlogan: { ar: 'نصنع تكنولوجيا موثوقة تحترم الإنسان وتدوم عبر الأجيال', en: 'Building trustworthy, human-centered technology that endures' },
   heroLocation: { ar: 'بابل، العراق', en: 'Babil, Iraq' },
-  heroAvailable: { ar: 'متاح للمشاريع والتعاون', en: 'Available for projects & collaboration' },
+  heroAvailable: { ar: 'متاح للمشاريع والتحول الرقمي', en: 'Available for architecture & projects' },
 
   // About & Services
-  aboutTitle: { ar: 'من أنا', en: 'About Me' },
+  aboutTitle: { ar: 'عن المنظومة', en: 'About Ecosystem' },
   aboutDesc: {
-    ar: 'مطور متخصص في الأتمتة والذكاء الاصطناعي، أبني منتجات رقمية تحل مشاكل حقيقية وتزيد من السرعة والإنتاجية.',
-    en: 'Developer specialized in automation & AI, building digital products that solve real problems and boost productivity.',
+    ar: 'مبادرة تقنية عراقية تهدف لبناء منتجات رقمية موثوقة، تعتمد البساطة المهيكلة، الخصوصية المطلقة، والتميز الهندسي.',
+    en: 'An Iraqi technology initiative dedicated to building trustworthy digital products through structured simplicity, privacy, and engineering excellence.',
   },
 
   // Apps
-  appsTitle: { ar: 'تطبيقاتنا والحلول البرمجية', en: 'Our Apps & Software Solutions' },
+  appsTitle: { ar: 'منتجات المنظومة الرقمية', en: 'ZMAM Digital Ecosystem' },
   appsDesc: {
-    ar: 'مجموعة التطبيقات الاحترافية المصممة بعناية فائقة لتلبية احتياجات المتاجر والمستخدمين',
-    en: 'A collection of professional apps designed with extreme precision for businesses and users',
+    ar: 'حلول رقمية هندسية مصممة بعناية لتبسيط الحياة اليومية وتمكين المتاجر والمؤسسات',
+    en: 'Engineered digital products crafted to simplify daily life and empower institutions',
   },
 
   // Contact
-  contactTitle: { ar: 'لنعمل معاً!', en: "Let's Work Together!" },
-  contactDesc: { ar: 'ابدأ محادثة حول مشروعك القادم عبر الواتساب أو البريد الإلكتروني', en: 'Start a conversation about your next project via WhatsApp or Email' },
-  sendWhatsApp: { ar: 'إرسال عبر واتساب', en: 'Send via WhatsApp' },
+  contactTitle: { ar: 'تواصل معنا', en: "Let's Connect" },
+  contactDesc: { ar: 'استفسر أو ناقش مشروعك القادم مع معمارية المنظومة مباشرة', en: 'Discuss your next digital system directly with our team' },
+  sendWhatsApp: { ar: 'تواصل عبر واتساب', en: 'Connect on WhatsApp' },
 
   // Common Buttons
   scrollDown: { ar: 'مرّر للأسفل', en: 'Scroll Down' },
   backToTop: { ar: 'العودة للأعلى', en: 'Back to Top' },
   loading: { ar: 'جاري التحميل...', en: 'Loading...' },
-  readMore: { ar: 'اقرأ المزيد', en: 'Read More' },
+  readMore: { ar: 'استكشف المزيد', en: 'Explore More' },
   downloadCV: { ar: 'تحميل السيرة الذاتية', en: 'Download CV' },
   switchLang: { ar: 'EN', en: 'عربي' },
 } as const;
@@ -71,3 +73,4 @@ export const LangContext = createContext<LangContextType>({
 });
 
 export const useLang = () => useContext(LangContext);
+

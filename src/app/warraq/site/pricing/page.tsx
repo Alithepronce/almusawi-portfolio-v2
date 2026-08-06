@@ -592,7 +592,7 @@ export default function PricingPage() {
                       <input 
                         type="text" 
                         className="w-input" 
-                        placeholder={plansType === 'shop' ? 'مثال: مطبعة التميز السريعة' : 'مثال: علي الموسوي'}
+                        placeholder={plansType === 'shop' ? 'مثال: مطبعة التميز السريعة' : 'مثال: علي موفق'}
                         value={libraryName}
                         onChange={e => setLibraryName(e.target.value)}
                         required

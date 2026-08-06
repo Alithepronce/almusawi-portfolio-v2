@@ -1,142 +1,63 @@
-import type { Metadata } from 'next';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'شروط الاستخدام — متصفح زِمام | Zemam Browser Terms of Service',
-  description: 'شروط وأحكام استخدام تطبيق متصفح زمام. Terms of Service for Zemam Browser.',
-};
+import PageShell from '@/components/ui/PageShell';
+import { FileText, ArrowRight, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+import { useLang } from '@/lib/i18n';
 
 export default function ZemamTermsPage() {
+  const { lang } = useLang();
+  const isRtl = lang === 'ar';
+
   return (
-    <div
-      style={{
-        minHeight: '80vh',
-        color: 'var(--w-text)',
-        fontFamily: "'Tajawal', 'Inter', system-ui, sans-serif",
-        direction: 'rtl',
-        padding: '40px 20px 80px',
-      }}
-    >
-      <div style={{ maxWidth: '780px', margin: '0 auto' }}>
+    <PageShell>
+      <div className="max-w-4xl mx-auto pb-24 pt-4">
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-          <h1
-            style={{
-              fontSize: 'clamp(28px, 5vw, 42px)',
-              fontWeight: 800,
-              background: 'linear-gradient(135deg, #3B82F6, #2563EB)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              marginBottom: '12px',
-            }}
-          >
-            شروط الاستخدام
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-4 py-1.5 text-xs font-bold text-purple-300 mb-4 backdrop-blur-xl">
+            <FileText size={14} />
+            {isRtl ? 'شروط الخدمة والاتفاقية' : 'Terms of Service'}
+          </div>
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-3">
+            {isRtl ? 'شروط الاستخدام والخدمة' : 'Terms & Conditions'}
           </h1>
-          <p style={{ color: 'var(--w-text-sec)', fontSize: '14px' }}>
-            متصفح زِمام — Zemam Browser
-          </p>
-          <p style={{ color: 'var(--w-text-muted)', fontSize: '13px', marginTop: '8px' }}>
-            آخر تحديث: 21 يونيو 2026
+          <p className="text-sm text-neutral-400">
+            {isRtl ? 'منظومة مشروع زمام — علي موفق' : 'Project ZMAM Ecosystem — Ali Muwaffaq'}
           </p>
         </div>
 
         {/* Content */}
-        <div
-          style={{
-            background: 'var(--w-bg-subtle)',
-            border: '1px solid var(--w-border)',
-            borderRadius: '20px',
-            padding: 'clamp(24px, 5vw, 40px)',
-            lineHeight: 1.85,
-            fontSize: '15px',
-          }}
-        >
-          <Section title="1. القبول بالشروط">
-            باستخدامك أو تثبيتك لتطبيق متصفح زِمام (&quot;التطبيق&quot;)، فإنك توافق
-            على الالتزام بهذه الشروط والأحكام. إذا كنت لا توافق على أي من هذه
-            الشروط، يرجى عدم استخدام التطبيق وحذفه من جهازك.
-          </Section>
+        <div className="glass-card-apple p-8 sm:p-12 space-y-8 text-neutral-300 text-sm leading-relaxed">
+          <section className="border-b border-white/10 pb-6">
+            <h2 className="text-xl font-bold text-white mb-3">
+              {isRtl ? '1. القبول بالشروط' : '1. Acceptance of Terms'}
+            </h2>
+            <p>
+              {isRtl
+                ? 'باستخدامك لتطبيقات ومنتجات منظومة مشروع زمام، فإنك توافق على الالتزام بهذه الشروط والسياسات المعتمدة.'
+                : 'By using Project ZMAM applications and services, you agree to comply with these terms.'}
+            </p>
+          </section>
 
-          <Section title="2. وصف الخدمة">
-            متصفح زِمام هو تطبيق متصفح ويب يوفر تجربة تصفح آمنة وخاصة مع
-            ميزات مدمجة تشمل: حظر الإعلانات، اتصال VPN مشفر، وضع القراءة
-            المنقّى، حفظ المقالات دون اتصال، مشغل وسائط مدمج، قفل بيومتري
-            (FaceID)، ودعم التبويبات المتعددة ووضع التصفح الخاص.
-          </Section>
+          <section className="border-b border-white/10 pb-6">
+            <h2 className="text-xl font-bold text-white mb-3">
+              {isRtl ? '2. الملكية الفكرية' : '2. Intellectual Property'}
+            </h2>
+            <p>
+              {isRtl
+                ? 'جميع حقوق الملكية الفكرية، التصاميم، والشعارات والعلامات التجارية لـ "زمام"، "الوراق"، "خُطى"، و "جلامورا" محفوظة لصالح علي موفق (Ali Muwaffaq).'
+                : 'All intellectual property, code, trademarks, and design systems belong to Ali Muwaffaq.'}
+            </p>
+          </section>
 
-          <Section title="3. الاستخدام المقبول">
-            <p>يُسمح باستخدام التطبيق لأغراض قانونية فقط. يلتزم المستخدم بما يلي:</p>
-            <ul style={{ paddingRight: '20px', margin: '12px 0' }}>
-              <li>استخدام التطبيق لتصفح الويب بطريقة قانونية ومسؤولة.</li>
-              <li>عدم استخدام التطبيق للوصول إلى محتوى غير قانوني بموجب القوانين المحلية والدولية.</li>
-              <li>عدم استخدام ميزات الخصوصية (VPN/Proxy) لأنشطة تخريبية أو ضارة أو مخالفة للقانون.</li>
-              <li>عدم محاولة استغلال أو اختراق التطبيق أو التلاعب بأنظمته الداخلية.</li>
-              <li>الالتزام بحقوق الملكية الفكرية للمحتوى المتاح عبر الإنترنت.</li>
-            </ul>
-          </Section>
-
-          <Section title="4. التصنيف العمري">
-            التطبيق مصنف للفئة العمرية <strong>17+</strong> نظراً لطبيعته كمتصفح ويب يتيح الوصول المفتوح للإنترنت. يقر المستخدم بأنه يبلغ من العمر 17 عاماً أو أكثر، أو يستخدم التطبيق تحت إشراف ولي الأمر.
-          </Section>
-
-          <Section title="5. الملكية الفكرية">
-            <p>جميع حقوق الملكية الفكرية المتعلقة بالتطبيق، بما في ذلك التصميم والكود البرمجي والشعار والاسم التجاري &quot;زِمام&quot;، محفوظة لصالح المطور Ali Muwaffaq.</p>
-            <p style={{ marginTop: '8px' }}>يتحمل المستخدم المسؤولية الكاملة عن أي محتوى يتم الوصول إليه أو تحميله عبر التطبيق، ويجب عليه احترام حقوق الملكية الفكرية لأصحابها.</p>
-          </Section>
-
-          <Section title="6. إخلاء المسؤولية">
-            <ul style={{ paddingRight: '20px', margin: '12px 0' }}>
-              <li>يُقدم التطبيق &quot;كما هو&quot; (As-Is) بدون أي ضمانات صريحة أو ضمنية.</li>
-              <li>لا نتحمل مسؤولية أي محتوى يتم الوصول إليه عبر المتصفح، حيث إن المحتوى يأتي من مواقع ويب خارجية مستقلة.</li>
-              <li>لا نتحمل أي مسؤولية عن فقدان البيانات المخزنة محلياً نتيجة حذف التطبيق أو إعادة ضبط الجهاز.</li>
-            </ul>
-          </Section>
-
-          <Section title="7. الخدمات المجانية">
-            جميع ميزات التطبيق متاحة مجاناً بالكامل ولا يتضمن التطبيق أي اشتراكات أو مشتريات داخلية. نحتفظ بالحق في إضافة ميزات مدفوعة مستقبلاً مع الإعلان المسبق عنها.
-          </Section>
-
-          <Section title="8. التعديلات والتحديثات">
-            <p>نحتفظ بالحق في تعديل هذه الشروط في أي وقت. سيتم نشر النسخة المحدثة على هذه الصفحة مع تحديث تاريخ آخر تعديل. استمرارك في استخدام التطبيق بعد نشر التعديلات يعني قبولك للشروط المحدثة.</p>
-          </Section>
-
-          <Section title="9. إنهاء الاستخدام">
-            يمكنك التوقف عن استخدام التطبيق في أي وقت بحذفه من جهازك. عند الحذف، تُزال جميع البيانات المحلية المرتبطة بالتطبيق بشكل نهائي.
-          </Section>
-
-          <Section title="10. القانون المعمول به">
-            تخضع هذه الشروط للقوانين المعمول بها في جمهورية العراق. في حال نشوء أي نزاع، يتم حله ودياً أولاً عبر التواصل المباشر، وفي حال تعذر ذلك، تختص المحاكم المدنية المحلية بالنظر فيه.
-          </Section>
-
-          <Section title="11. تواصل معنا">
-            <p>لأي استفسارات حول هذه الشروط:</p>
-            <ul style={{ paddingRight: '20px', margin: '12px 0' }}>
-              <li><strong>البريد الإلكتروني:</strong> gamegdeo@gmail.com</li>
-              <li><strong>المطور:</strong> Ali Muwaffaq</li>
-              <li><strong>الموقع:</strong> alimuwaffaq.my</li>
-            </ul>
-          </Section>
+          <div className="pt-4 flex justify-between items-center text-xs text-neutral-400 flex-wrap gap-4">
+            <Link href="/zemam" className="inline-flex items-center gap-2 text-purple-400 font-bold hover:underline">
+              {isRtl ? <ArrowRight size={14} /> : <ArrowLeft size={14} />}
+              <span>{isRtl ? 'العودة لدستور زمام' : 'Back to ZMAM Doctrine'}</span>
+            </Link>
+          </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div style={{ marginBottom: '28px' }}>
-      <h2
-        style={{
-          fontSize: '18px',
-          fontWeight: 700,
-          color: 'var(--w-text)',
-          marginBottom: '12px',
-          paddingBottom: '8px',
-          borderBottom: '1px solid var(--w-border)',
-        }}
-      >
-        {title}
-      </h2>
-      <div style={{ color: 'var(--w-text-sec)' }}>{children}</div>
-    </div>
+    </PageShell>
   );
 }

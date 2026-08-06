@@ -2,10 +2,10 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { useLang, t } from '@/lib/i18n';
-import { allProjects } from '@/data/projects';
-import { ArrowUpRight, Sparkles } from 'lucide-react';
 import PageShell from '@/components/ui/PageShell';
+import { useLang } from '@/lib/i18n';
+import { featuredProjects as projects } from '@/data/projects';
+import { Briefcase, ArrowUpRight, Sparkles, ExternalLink } from 'lucide-react';
 import { useInteractiveSounds } from '@/hooks/useInteractiveSounds';
 
 export default function WorkPage() {
@@ -15,87 +15,85 @@ export default function WorkPage() {
 
   return (
     <PageShell>
-      <section className="mb-12 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-[var(--gold-light)] mb-4"
-        >
-          <Sparkles size={14} />
-          {isRtl ? 'معرض الأعمال والأنظمة' : 'Projects & Systems Showcase'}
-        </motion.div>
-
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="text-4xl font-extrabold sm:text-5xl"
-        >
-          {isRtl ? 'أبرز المشاريع والتطبيقات' : 'Featured Works & Applications'}
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mt-4 max-w-2xl mx-auto text-base text-[var(--text-secondary)]"
-        >
-          {isRtl
-            ? 'تضم هذه القائمة حلول الأتمتة بالذكاء الاصطناعي، تطبيقات iOS الزجاجية، ونظم الكاشير والمخزون الاحترافية.'
-            : 'A curated list of AI automation pipelines, liquid glass iOS apps, and professional POS systems.'}
-        </motion.p>
-      </section>
-
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 pb-24">
-        {allProjects.map((project, index) => (
+      <div className="max-w-6xl mx-auto pb-24 pt-4">
+        {/* HERO SECTION */}
+        <section className="text-center mb-16">
           <motion.div
-            key={project.slug}
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.05 }}
+            className="inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-4 py-1.5 text-xs font-bold text-indigo-300 mb-6 backdrop-blur-xl"
           >
-            <Link
-              href={project.externalHref || `/work/${project.slug}`}
-              onClick={playClick}
-              onMouseEnter={playHover}
-              className="group block h-full rounded-[28px] border border-white/10 bg-white/5 p-6 transition hover:border-white/25 hover:bg-white/10 shadow-xl"
-            >
-              <div
-                className="mb-6 rounded-[22px] p-6 transition group-hover:scale-[1.02]"
-                style={{
-                  background: `linear-gradient(160deg, ${project.color}33, rgba(255,255,255,0.02))`,
-                }}
-              >
-                <div className="text-xs font-semibold text-[var(--text-secondary)]">
-                  {project.year ?? (isRtl ? 'حديث' : 'Recent')}
-                </div>
-                <h3 className="mt-8 text-2xl font-bold leading-tight">
-                  {isRtl ? project.title.ar : project.title.en}
-                </h3>
-              </div>
-
-              <p className="text-sm leading-7 text-[var(--text-secondary)]">
-                {isRtl ? project.desc.ar : project.desc.en}
-              </p>
-
-              <div className="mt-5 flex flex-wrap gap-2">
-                {project.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-[var(--text-secondary)]"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-
-              <div className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-[var(--gold-light)]">
-                {isRtl ? 'فتح الصفحة والتفاصيل' : 'Open Showcase Page'}
-                <ArrowUpRight size={16} className="transition group-hover:translate-x-0.5 group-hover:translate-y-[-1px]" />
-              </div>
-            </Link>
+            <Briefcase size={14} />
+            {isRtl ? 'المشاريع ودراسات الحالة' : 'Selected Case Studies & Engineering Projects'}
           </motion.div>
-        ))}
+
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-4xl font-extrabold sm:text-6xl tracking-tight text-white mb-6"
+          >
+            {isRtl ? 'الأعمال والمشاريع' : 'Featured'}{' '}
+            <span className="zmam-purple-text">{isRtl ? 'المختارة' : 'Projects'}</span>
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="max-w-3xl mx-auto text-base sm:text-lg text-neutral-400 leading-relaxed mb-8"
+          >
+            {isRtl
+              ? 'مجموعة مختارة من المشاريع والحلول التقنية المبتكرة التي تم تنفيذها بأعلى معايير الجودة والتميز البصري.'
+              : 'Selected engineering case studies showcasing product architecture, performance tuning, and clean execution.'}
+          </motion.p>
+        </section>
+
+        {/* PROJECTS BENTO GRID */}
+        <div className="grid gap-6 md:grid-cols-2">
+          {projects.map((project, index) => (
+            <motion.div
+              key={project.slug}
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.08 }}
+              onMouseEnter={playHover}
+            >
+              <Link
+                href={project.externalHref || `/work/${project.slug}`}
+                onClick={playClick}
+                className="glass-card-apple group block h-full p-8 sm:p-10 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-4 mb-6">
+                    <span className="text-xs font-bold text-neutral-400 bg-white/5 px-3 py-1 rounded-full border border-white/10">
+                      {project.year || (isRtl ? 'حديث' : 'Recent')}
+                    </span>
+                    <div className="flex gap-1.5 flex-wrap justify-end">
+                      {project.tags.slice(0, 3).map((tag) => (
+                        <span key={tag} className="px-2.5 py-0.5 rounded-full border border-white/10 bg-white/5 text-[11px] text-neutral-300 font-medium">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3 group-hover:text-purple-300 transition">
+                    {isRtl ? project.title.ar : project.title.en}
+                  </h3>
+                  <p className="text-sm text-neutral-400 leading-relaxed mb-8">
+                    {isRtl ? project.desc.ar : project.desc.en}
+                  </p>
+                </div>
+
+                <div className="inline-flex items-center gap-2 text-sm font-bold text-purple-400 transition group-hover:translate-x-1">
+                  <span>{isRtl ? 'عرض دراسة الحالة والتفاصيل' : 'Explore Case Study'}</span>
+                  <ArrowUpRight size={16} />
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </PageShell>
   );

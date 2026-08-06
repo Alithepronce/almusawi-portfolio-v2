@@ -1,185 +1,59 @@
-import type { Metadata } from 'next';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'الدعم الفني — متصفح زِمام | Zemam Browser Support',
-  description: 'صفحة الدعم الفني والأسئلة الشائعة لتطبيق متصفح زمام. Support and FAQ for Zemam Browser.',
-};
+import PageShell from '@/components/ui/PageShell';
+import { HelpCircle, Mail, Phone, MessageSquare, ArrowRight, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+import { useLang } from '@/lib/i18n';
 
 export default function ZemamSupportPage() {
+  const { lang } = useLang();
+  const isRtl = lang === 'ar';
+
   return (
-    <div
-      style={{
-        minHeight: '80vh',
-        color: 'var(--w-text)',
-        fontFamily: "'Tajawal', 'Inter', system-ui, sans-serif",
-        direction: 'rtl',
-        padding: '40px 20px 80px',
-      }}
-    >
-      <div style={{ maxWidth: '780px', margin: '0 auto' }}>
+    <PageShell>
+      <div className="max-w-4xl mx-auto pb-24 pt-4">
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-          <h1
-            style={{
-              fontSize: 'clamp(28px, 5vw, 42px)',
-              fontWeight: 800,
-              background: 'linear-gradient(135deg, #3B82F6, #2563EB)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              marginBottom: '12px',
-            }}
-          >
-            الدعم الفني
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-4 py-1.5 text-xs font-bold text-purple-300 mb-4 backdrop-blur-xl">
+            <HelpCircle size={14} />
+            {isRtl ? 'مركز الدعم والخدمات' : 'Support & Assistance'}
+          </div>
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-3">
+            {isRtl ? 'الدعم الفني والتواصل' : 'Technical Support'}
           </h1>
-          <p style={{ color: 'var(--w-text-sec)', fontSize: '14px' }}>
-            متصفح زِمام — Zemam Browser
+          <p className="text-sm text-neutral-400">
+            {isRtl ? 'منظومة مشروع زمام — علي موفق' : 'Project ZMAM Ecosystem — Ali Muwaffaq'}
           </p>
         </div>
 
-        {/* Contact Card */}
-        <div
-          style={{
-            background: 'var(--w-bg-subtle)',
-            border: '1px solid var(--w-border)',
-            borderRadius: '20px',
-            padding: 'clamp(24px, 5vw, 40px)',
-            marginBottom: '32px',
-            textAlign: 'center',
-          }}
-        >
-          <div style={{ fontSize: '40px', marginBottom: '16px' }}>📧</div>
-          <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '12px' }}>
-            تواصل معنا
-          </h2>
-          <p style={{ color: 'var(--w-text-sec)', fontSize: '15px', marginBottom: '20px', lineHeight: 1.7 }}>
-            للحصول على مساعدة أو الإبلاغ عن مشكلة، يمكنك التواصل معنا مباشرة
-            عبر البريد الإلكتروني وسنقوم بالرد في أقرب وقت ممكن.
-          </p>
-          <a
-            href="mailto:gamegdeo@gmail.com?subject=دعم%20متصفح%20زمام"
-            style={{
-              display: 'inline-block',
-              padding: '14px 36px',
-              background: '#3B82F6',
-              color: '#fff',
-              borderRadius: '50px',
-              textDecoration: 'none',
-              fontWeight: 700,
-              fontSize: '15px',
-            }}
-          >
-            gamegdeo@gmail.com
-          </a>
-          <p style={{ color: 'var(--w-text-muted)', fontSize: '13px', marginTop: '16px' }}>
-            المطور: Ali Muwaffaq
-          </p>
+        {/* Contact Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
+          <div className="glass-card-apple p-8 text-center bento-zmam">
+            <Mail size={32} className="mx-auto text-purple-400 mb-4" />
+            <h3 className="text-lg font-bold text-white mb-2">{isRtl ? 'البريد الإلكتروني المباشر' : 'Direct Email Support'}</h3>
+            <p className="text-xs text-neutral-400 mb-4">{isRtl ? 'للاستفسارات والتقارير الفنية' : 'For inquiries and technical reports'}</p>
+            <a href="mailto:gamegdeo@gmail.com" className="px-5 py-2.5 rounded-full bg-purple-600/30 text-purple-300 text-xs font-bold border border-purple-500/40 inline-block hover:bg-purple-600/50 transition">
+              gamegdeo@gmail.com
+            </a>
+          </div>
+
+          <div className="glass-card-apple p-8 text-center bento-warraq">
+            <MessageSquare size={32} className="mx-auto text-amber-400 mb-4" />
+            <h3 className="text-lg font-bold text-white mb-2">{isRtl ? 'التواصل عبر الواتساب' : 'WhatsApp Direct'}</h3>
+            <p className="text-xs text-neutral-400 mb-4">{isRtl ? 'استجابة سريعة ومباشرة' : 'Fast and direct response'}</p>
+            <a href="https://wa.me/9647767625001" target="_blank" rel="noreferrer" className="px-5 py-2.5 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold border border-amber-500/30 inline-block hover:bg-amber-500/30 transition">
+              +964 776 762 5001
+            </a>
+          </div>
         </div>
 
-        {/* FAQ */}
-        <div
-          style={{
-            background: 'var(--w-bg-subtle)',
-            border: '1px solid var(--w-border)',
-            borderRadius: '20px',
-            padding: 'clamp(24px, 5vw, 40px)',
-            lineHeight: 1.85,
-            fontSize: '15px',
-          }}
-        >
-          <h2
-            style={{
-              fontSize: '22px',
-              fontWeight: 700,
-              color: 'var(--w-text)',
-              marginBottom: '28px',
-              textAlign: 'center',
-            }}
-          >
-            الأسئلة الشائعة (FAQ)
-          </h2>
-
-          <FAQ
-            q="كيف أحذف سجل التصفح أو المفضلة؟"
-            a='انتقل إلى قسم "السجل" أو "المفضلة" من الشريط السفلي، ثم اضغط على زر "مسح الكل" لحذف جميع البيانات دفعة واحدة. يمكنك أيضاً حذف عناصر فردية بالضغط على أيقونة سلة المحذوفات بجانب كل عنصر.'
-          />
-          <FAQ
-            q="هل التطبيق يجمع بياناتي الشخصية؟"
-            a="لا. جميع البيانات تُخزن محلياً على جهازك فقط ولا تُرسل إلى أي خادم خارجي. لا نستخدم أي أدوات تحليل أو تتبع."
-          />
-          <FAQ
-            q="كيف أفعّل قفل التطبيق بالبصمة (FaceID)؟"
-            a='افتح إعدادات التطبيق (أيقونة الترس في الشاشة الرئيسية)، ثم فعّل خيار "قفل بالبصمة". سيُطلب منك المصادقة عبر FaceID أو TouchID في كل مرة تفتح التطبيق.'
-          />
-          <FAQ
-            q="ما هي ميزة VPN/Proxy؟"
-            a="عند تفعيل VPN من الشاشة الرئيسية، يتم توجيه حركة تصفحك عبر خوادم بروكسي مشفرة لإخفاء عنوان IP الحقيقي وحماية خصوصيتك. الميزة مجانية بالكامل."
-          />
-          <FAQ
-            q="هل التطبيق يدعم iPad؟"
-            a="نعم، التطبيق يدعم أجهزة iPad بالكامل مع واجهة مُحسّنة للشاشات الكبيرة."
-          />
-          <FAQ
-            q="ما هي ميزة وضع القراءة؟"
-            a="وضع القراءة يستخرج النص الأساسي من أي صفحة ويب ويعرضه بتنسيق نظيف وخالي من الإعلانات والفوضى البصرية. يمكنك أيضاً حفظ المقالات للقراءة لاحقاً دون الحاجة لاتصال إنترنت."
-          />
-          <FAQ
-            q="كيف أغيّر لون ومظهر التطبيق؟"
-            a='افتح الإعدادات واختر من بين ألوان التمييز المتاحة، أو أدخل لوناً مخصصاً بصيغة HEX. يمكنك أيضاً التبديل بين وضع التدرج اللوني ووضع OLED (الأسود الداكن).'
-          />
-          <FAQ
-            q="التطبيق لا يعمل أو يتوقف فجأة، ماذا أفعل؟"
-            a="جرّب إغلاق التطبيق تماماً وإعادة فتحه. إذا استمرت المشكلة، قم بحذف التطبيق وإعادة تثبيته. إذا لم يحل ذلك المشكلة، تواصل معنا عبر البريد الإلكتروني مع وصف المشكلة ونوع جهازك."
-          />
-        </div>
-
-        {/* Links */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '24px',
-            marginTop: '40px',
-            flexWrap: 'wrap',
-          }}
-        >
-          <a
-            href="/zemam/privacy"
-            style={{ color: '#3B82F6', fontSize: '14px', textDecoration: 'none', fontWeight: 600 }}
-          >
-            سياسة الخصوصية
-          </a>
-          <a
-            href="/zemam/terms"
-            style={{ color: '#3B82F6', fontSize: '14px', textDecoration: 'none', fontWeight: 600 }}
-          >
-            شروط الاستخدام
-          </a>
-          <a
-            href="/zemam"
-            style={{ color: '#3B82F6', fontSize: '14px', textDecoration: 'none', fontWeight: 600 }}
-          >
-            صفحة التطبيق الرئيسية
-          </a>
+        <div className="text-center pt-4">
+          <Link href="/zemam" className="inline-flex items-center gap-2 text-purple-400 font-bold hover:underline text-sm">
+            {isRtl ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
+            <span>{isRtl ? 'العودة لدستور منظومة زمام' : 'Back to ZMAM Constitution'}</span>
+          </Link>
         </div>
       </div>
-    </div>
-  );
-}
-
-function FAQ({ q, a }: { q: string; a: string }) {
-  return (
-    <div style={{ marginBottom: '24px' }}>
-      <h3
-        style={{
-          fontSize: '16px',
-          fontWeight: 700,
-          color: 'var(--w-text)',
-          marginBottom: '8px',
-        }}
-      >
-        ❓ {q}
-      </h3>
-      <p style={{ color: 'var(--w-text-sec)', fontSize: '14px', lineHeight: 1.75 }}>{a}</p>
-    </div>
+    </PageShell>
   );
 }

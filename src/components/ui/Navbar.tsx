@@ -2,76 +2,54 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useLang, t } from '@/lib/i18n';
-import { Globe, Menu, X, Sun, Moon, Volume2, VolumeX, Sparkles } from 'lucide-react';
-import { useTheme } from 'next-themes';
+import { Globe, Menu, X, ArrowUpRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useStore } from '@/store/useStore';
 import { useInteractiveSounds } from '@/hooks/useInteractiveSounds';
 
-const navItems = [
+const mainNavItems = [
   { href: '/', labelKey: 'home' },
-  { href: '/work', labelKey: 'work' },
   { href: '/apps', labelKey: 'apps' },
+  { href: '/zemam', labelKey: 'zemam' },
+  { href: '/work', labelKey: 'work' },
   { href: '/cv', labelKey: 'cv' },
-  { href: '/office', labelKey: 'office' },
-  { href: '/blog', labelKey: 'blog' },
-  { href: '/guestbook', labelKey: 'guestbook' },
-  { href: '/links', labelKey: 'links' },
   { href: '/contact', labelKey: 'contact' },
 ] as const;
 
 export default function Navbar() {
   const pathname = usePathname();
   const { lang, setLang } = useLang();
-  const { theme, setTheme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const isAudioEnabled = useStore((s) => s.isAudioEnabled);
-  const toggleAudio = useStore((s) => s.toggleAudio);
-  const { playClick, playHover, playTheme } = useInteractiveSounds();
-
-  useEffect(() => setMounted(true), []);
-
-  const isDark = resolvedTheme === 'dark';
+  const { playClick, playHover } = useInteractiveSounds();
 
   const toggleLanguage = () => {
     playClick();
     setLang(lang === 'ar' ? 'en' : 'ar');
   };
 
-  const handleAudioToggle = () => {
-    playClick();
-    toggleAudio();
-  };
-
-  const handleThemeToggle = () => {
-    playTheme();
-    setTheme(isDark ? 'light' : 'dark');
-  };
-
   return (
     <header className="fixed top-0 left-0 right-0 z-50 px-4 py-3 sm:px-8 sm:py-4">
-      <div className="mx-auto flex max-w-[1280px] items-center justify-between rounded-full border border-white/10 bg-black/40 px-5 py-3 backdrop-blur-md shadow-2xl">
+      <div className="mx-auto flex max-w-[1240px] items-center justify-between flex-nowrap rounded-full border border-black/8 bg-white/80 px-5 py-2.5 backdrop-blur-2xl shadow-sm">
+        
         {/* BRAND LOGO */}
         <Link 
           href="/" 
           onClick={playClick}
-          className="flex items-center gap-3 font-bold text-lg tracking-tight text-[var(--text)] transition hover:opacity-90"
+          className="flex items-center gap-2.5 font-bold text-sm sm:text-base tracking-tight text-[#1d1d1f] shrink-0 transition hover:opacity-80"
         >
-          <div className="relative h-9 w-9 overflow-hidden rounded-full border border-white/20">
-            <Image src="/logo.png" alt="Ali Al-Musawi Logo" fill className="object-cover" />
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#1d1d1f] text-white text-xs font-black">
+            ZM
           </div>
-          <span className="hidden sm:inline font-bold">
-            {lang === 'ar' ? 'علي الموسوي' : 'Ali Al-Musawi'}
+          <span className="font-extrabold tracking-tight whitespace-nowrap text-[#1d1d1f]">
+            {lang === 'ar' ? 'علي موفق' : 'Ali Muwaffaq'}
+            <span className="mr-1.5 ml-1.5 text-xs font-normal text-[#86868b]">| زمام</span>
           </span>
         </Link>
 
-        {/* DESKTOP NAV LINKS */}
-        <nav className="hidden lg:flex items-center gap-1">
-          {navItems.map((item) => {
+        {/* DESKTOP NAV LINKS (Visible on xl screens >= 1280px) */}
+        <nav className="hidden xl:flex items-center gap-1 shrink-0">
+          {mainNavItems.map((item) => {
             const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href));
             return (
               <Link
@@ -79,64 +57,45 @@ export default function Navbar() {
                 href={item.href}
                 onClick={playClick}
                 onMouseEnter={playHover}
-                className={`relative px-3.5 py-1.5 text-sm font-medium transition-colors rounded-full ${
-                  isActive ? 'text-[var(--gold-light)] font-semibold' : 'text-[var(--text-secondary)] hover:text-[var(--text)]'
+                className={`relative px-4 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors rounded-full ${
+                  isActive ? 'text-[#1d1d1f] font-extrabold bg-black/5' : 'text-[#515154] hover:text-[#1d1d1f] hover:bg-black/5'
                 }`}
               >
                 {t(item.labelKey, lang)}
-                {isActive && (
-                  <motion.div
-                    layoutId="activeNavTab"
-                    className="absolute inset-0 rounded-full bg-white/10 border border-white/15"
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  />
-                )}
               </Link>
             );
           })}
         </nav>
 
-        {/* CONTROLS (Lang, Theme, Audio, Mobile Toggle) */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Audio Toggle */}
-          <button
-            onClick={handleAudioToggle}
-            onMouseEnter={playHover}
-            aria-label="Toggle Audio"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[var(--text-secondary)] transition hover:border-white/20 hover:text-[var(--text)]"
-          >
-            {isAudioEnabled ? <Volume2 size={16} className="text-[var(--gold-light)]" /> : <VolumeX size={16} />}
-          </button>
-
-          {/* Theme Toggle */}
-          {mounted && (
-            <button
-              onClick={handleThemeToggle}
-              onMouseEnter={playHover}
-              aria-label="Toggle Theme"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[var(--text-secondary)] transition hover:border-white/20 hover:text-[var(--text)]"
-            >
-              {isDark ? <Sun size={16} className="text-amber-300" /> : <Moon size={16} className="text-indigo-400" />}
-            </button>
-          )}
-
+        {/* CONTROLS (Lang & Mobile Toggle) */}
+        <div className="flex items-center gap-2 shrink-0">
           {/* Language Switcher */}
           <button
             onClick={toggleLanguage}
             onMouseEnter={playHover}
-            className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-[var(--text-secondary)] transition hover:border-white/20 hover:text-[var(--text)]"
+            className="flex items-center gap-1.5 rounded-full border border-black/10 bg-black/5 px-3 py-1 text-xs font-bold text-[#1d1d1f] transition hover:bg-black/10 whitespace-nowrap"
           >
-            <Globe size={14} />
+            <Globe size={13} className="text-[#0066cc]" />
             <span>{t('switchLang', lang)}</span>
           </button>
 
-          {/* Mobile Menu Toggle */}
+          {/* Contact Direct CTA Button */}
+          <Link
+            href="/contact"
+            onClick={playClick}
+            className="hidden sm:inline-flex items-center gap-1 px-4 py-1 text-xs font-bold rounded-full bg-[#1d1d1f] text-white hover:bg-black transition"
+          >
+            <span>{lang === 'ar' ? 'تواصل' : 'Contact'}</span>
+            <ArrowUpRight size={12} />
+          </Link>
+
+          {/* Mobile/Tablet Menu Toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle Mobile Menu"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[var(--text)] lg:hidden"
+            aria-label="Toggle Navigation Menu"
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-black/10 bg-black/5 text-[#1d1d1f] xl:hidden"
           >
-            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
         </div>
       </div>
@@ -145,13 +104,14 @@ export default function Navbar() {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="mt-3 rounded-3xl border border-white/12 bg-black/90 p-6 backdrop-blur-2xl lg:hidden shadow-2xl"
+            initial={{ opacity: 0, y: -12, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -12, scale: 0.98 }}
+            transition={{ duration: 0.2 }}
+            className="mx-auto mt-2 max-w-[1240px] rounded-3xl border border-black/10 bg-white/95 p-5 backdrop-blur-2xl xl:hidden shadow-xl"
           >
-            <div className="flex flex-col gap-3">
-              {navItems.map((item) => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {mainNavItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -159,8 +119,10 @@ export default function Navbar() {
                     playClick();
                     setMobileMenuOpen(false);
                   }}
-                  className={`rounded-xl p-3 text-base font-semibold transition ${
-                    pathname === item.href ? 'bg-white/10 text-[var(--gold-light)]' : 'text-[var(--text-secondary)] hover:bg-white/5'
+                  className={`rounded-2xl p-3 text-sm font-bold text-center transition ${
+                    pathname === item.href 
+                      ? 'bg-[#1d1d1f] text-white shadow-md' 
+                      : 'text-[#1d1d1f] hover:bg-black/5'
                   }`}
                 >
                   {t(item.labelKey, lang)}

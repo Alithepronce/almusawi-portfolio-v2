@@ -15,7 +15,7 @@ interface Entry {
 }
 
 const defaultEntries: Entry[] = [
-  { id: '1', name: 'أحمد الحلي', message: 'موقع فخم جداً وتطبيقات ممتازة! بالتوفيق أخ علي الموسوي.', date: '2026-07-20' },
+  { id: '1', name: 'أحمد الحلي', message: 'موقع فخم جداً وتطبيقات ممتازة! بالتوفيق أخ علي موفق.', date: '2026-07-20' },
   { id: '2', name: 'Sara K.', message: 'Stunning 3D design and incredibly fast performance. Great work!', date: '2026-07-18' },
   { id: '3', name: 'حسين الفتلاوي', message: 'تطبيق غلامورا وتطبيقات الكاشير غيرت طريقة عمل المحل كلياً.', date: '2026-07-10' },
 ];
