@@ -13,6 +13,7 @@ import {
   ExternalLink,
   ArrowLeft,
   ArrowRight,
+  ArrowUpRight,
   Sparkles,
   Layers,
   Cpu,
@@ -30,8 +31,68 @@ import {
   RefreshCw,
   Clock,
   Key,
+  Shield,
+  HelpCircle,
 } from 'lucide-react';
 import { useInteractiveSounds } from '@/hooks/useInteractiveSounds';
+
+// Showcase apps catalog directly available in ZMAM Store
+const showcaseAppsList = [
+  {
+    name: 'Instagram Rocket VIP',
+    category: { ar: 'تطبيقات بلس وتنزيل', en: 'Plus & Media Download' },
+    desc: { ar: 'حفظ الستوريات والفيديوهات بجودة أصلية، إخفاء الظهور وقراءة الرسائل، وإزالة الإعلانات.', en: 'Download stories & reels in original quality, ghost mode, and ad-free browsing.' },
+    icon: '📸',
+    version: 'v320.0',
+    size: '142 MB',
+    tag: { ar: 'توقيع معتمد', en: 'Signed' }
+  },
+  {
+    name: 'WhatsApp Watusi 3 Pro',
+    category: { ar: 'أدوات وخصوصية', en: 'Privacy & Tools' },
+    desc: { ar: 'تجميد آخر ظهور، منع حذف الرسائل، إخفاء صحين القراءة، وقفل المحادثات بـ Face ID.', en: 'Freeze last seen, anti-delete messages, hide read receipts, and biometric chat lock.' },
+    icon: '💬',
+    version: 'v24.5',
+    size: '118 MB',
+    tag: { ar: 'توقيع معتمد', en: 'Signed' }
+  },
+  {
+    name: 'PUBG Mobile Safe Radar VIP',
+    category: { ar: 'ألعاب معدلة وحماية', en: 'Tweaked Games & Anti-Ban' },
+    desc: { ar: 'كشف أماكن الخصوم (ESP Radar)، ثبات السلاح الآمن، وحماية مضادة للباند بنسبة 100%.', en: 'Safe ESP radar, weapon stability, and full anti-ban protection layer.' },
+    icon: '🎯',
+    version: 'v3.2.0',
+    size: '1.8 GB',
+    tag: { ar: 'VIP حصري', en: 'VIP Only' }
+  },
+  {
+    name: 'TikTok Unicorn Pro Max',
+    category: { ar: 'وسائط وترفيه', en: 'Social & Media' },
+    desc: { ar: 'تنزيل الفيديوهات بدون علامة مائية بلمسة واحدة، تشغيل بالخلفية وتخطي القيود الجغرافية.', en: '1-tap watermark-free video downloads, background audio, and region bypass.' },
+    icon: '🎵',
+    version: 'v33.1',
+    size: '165 MB',
+    tag: { ar: 'توقيع معتمد', en: 'Signed' }
+  },
+  {
+    name: 'YouTube Cercube Plus Max',
+    category: { ar: 'فيديو وصوتيات', en: 'Video & Audio Tools' },
+    desc: { ar: 'حجب كامل لجميع الإعلانات، تشغيل في الخلفية وفي صورة داخل صورة (PiP)، وتنزيل 4K.', en: 'Total ad blocking, background playback, PiP support, and 4K video downloads.' },
+    icon: '▶️',
+    version: 'v19.1',
+    size: '130 MB',
+    tag: { ar: 'توقيع معتمد', en: 'Signed' }
+  },
+  {
+    name: 'Spotify++ Deluxe Audio',
+    category: { ar: 'صوتيات وموسيقى', en: 'Music & Audio' },
+    desc: { ar: 'تخطي غير محدود للأغاني، صوت فائق النقاء Extreme Quality، وبدون أي فواصل إعلانية.', en: 'Unlimited skips, extreme audio quality, and zero commercial interruptions.' },
+    icon: '🎧',
+    version: 'v8.9',
+    size: '95 MB',
+    tag: { ar: 'توقيع معتمد', en: 'Signed' }
+  },
+];
 
 // Store Architecture Modules under ZMAM Standards
 const storeModules = [
@@ -252,8 +313,30 @@ export default function StorePage() {
   const isRtl = lang === 'ar';
   const { playHover, playClick } = useInteractiveSounds();
   const [activeTab, setActiveTab] = useState('app');
+  const [voucherCode, setVoucherCode] = useState('');
+  const [voucherStatus, setVoucherStatus] = useState<string | null>(null);
+  const [loadingVoucher, setLoadingVoucher] = useState(false);
 
   const currentModule = storeModules.find((m) => m.id === activeTab) || storeModules[0];
+
+  const handleRedeemVoucher = (e: React.FormEvent) => {
+    e.preventDefault();
+    playClick();
+    if (!voucherCode.trim()) {
+      setVoucherStatus(isRtl ? 'يرجى إدخال كود التفعيل أولاً.' : 'Please enter a voucher code first.');
+      return;
+    }
+    setLoadingVoucher(true);
+    setVoucherStatus(isRtl ? 'جاري التحقق من كود الاشتراك...' : 'Verifying voucher code...');
+    setTimeout(() => {
+      setLoadingVoucher(false);
+      setVoucherStatus(
+        isRtl
+          ? 'تم التحقق! لتأكيد الربط بجهازك، يرجى توثيق الـ UDID أدناه وسيقوم النظام بتفعيل باقتك فوراً.'
+          : 'Verified! Please complete UDID enrollment below to activate this device immediately.'
+      );
+    }, 1000);
+  };
 
   return (
     <PageShell>
@@ -299,31 +382,26 @@ export default function StorePage() {
             transition={{ delay: 0.3 }}
             className="flex flex-wrap items-center justify-center gap-4"
           >
-            {/* Primary CTA: Open Live Store */}
+            {/* Primary Action: Direct UDID Profile Download */}
             <a
-              href="https://ios-store-production.up.railway.app"
-              target="_blank"
-              rel="noreferrer"
+              href="https://ios-store-production.up.railway.app/api/udid/mobileconfig"
               onClick={playClick}
               onMouseEnter={playHover}
               className="inline-flex min-h-12 items-center gap-2.5 rounded-full bg-[#0f766e] px-8 py-3.5 text-sm font-bold text-white transition hover:bg-[#115e59] shadow-lg"
             >
-              <Smartphone size={17} />
-              <span>{isRtl ? 'فتح متجر زمام المباشر' : 'Launch Live ZMAM Store'}</span>
-              <ExternalLink size={15} />
+              <QrCode size={17} />
+              <span>{isRtl ? 'توثيق الجهاز وتنزيل البروفايل (UDID)' : 'Enroll iPhone (Download Profile)'}</span>
             </a>
 
-            {/* Direct UDID Auto-Enrollment Link */}
+            {/* Scroll to Voucher Redemption */}
             <a
-              href="https://ios-store-production.up.railway.app/udid"
-              target="_blank"
-              rel="noreferrer"
+              href="#voucher-section"
               onClick={playClick}
               onMouseEnter={playHover}
               className="inline-flex min-h-12 items-center gap-2 rounded-full border border-black/15 bg-white px-7 py-3.5 text-sm font-bold text-[#1d1d1f] transition hover:bg-black/5 shadow-sm"
             >
-              <QrCode size={16} className="text-[#0f766e]" />
-              <span>{isRtl ? 'توثيق الجهاز تلقائياً (UDID)' : 'Enroll iPhone UDID'}</span>
+              <Ticket size={16} className="text-[#0f766e]" />
+              <span>{isRtl ? 'تفعيل كود اشتراك جاهز' : 'Redeem Voucher Code'}</span>
             </a>
 
             {/* Telegram Support & Activation Link */}
@@ -344,7 +422,7 @@ export default function StorePage() {
         {/* METRICS & KEY STATS HUD */}
         <section className="mb-20">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="apple-studio-card p-6 text-center">
+            <div className="apple-studio-card p-6 text-center bg-white border border-black/8">
               <div className="text-3xl font-extrabold text-[#0f766e] mb-1">100%</div>
               <div className="text-xs font-bold text-[#1d1d1f] mb-1">
                 {isRtl ? 'بدون جلبريك إطلاقاً' : 'Zero Jailbreak Required'}
@@ -354,7 +432,7 @@ export default function StorePage() {
               </p>
             </div>
 
-            <div className="apple-studio-card p-6 text-center">
+            <div className="apple-studio-card p-6 text-center bg-white border border-black/8">
               <div className="text-3xl font-extrabold text-[#6366f1] mb-1">&lt; 3s</div>
               <div className="text-xs font-bold text-[#1d1d1f] mb-1">
                 {isRtl ? 'سرعة التوقيع السحابي' : 'Cloud Signing Latency'}
@@ -364,7 +442,7 @@ export default function StorePage() {
               </p>
             </div>
 
-            <div className="apple-studio-card p-6 text-center">
+            <div className="apple-studio-card p-6 text-center bg-white border border-black/8">
               <div className="text-3xl font-extrabold text-[#0891b2] mb-1">100</div>
               <div className="text-xs font-bold text-[#1d1d1f] mb-1">
                 {isRtl ? 'سعة الشهادة الذكية' : 'Devices per Certificate'}
@@ -374,7 +452,7 @@ export default function StorePage() {
               </p>
             </div>
 
-            <div className="apple-studio-card p-6 text-center">
+            <div className="apple-studio-card p-6 text-center bg-white border border-black/8">
               <div className="text-3xl font-extrabold text-[#d97706] mb-1">iOS 15–18+</div>
               <div className="text-xs font-bold text-[#1d1d1f] mb-1">
                 {isRtl ? 'توافق كامل وشامل' : 'Full iOS Compatibility'}
@@ -383,6 +461,188 @@ export default function StorePage() {
                 {isRtl ? 'كافة موديلات الآيفون والآيباد' : 'iPhone & iPad universal support'}
               </p>
             </div>
+          </div>
+        </section>
+
+        {/* HOW UDID ENROLLMENT WORKS (3 STEPS) */}
+        <section className="mb-24">
+          <div className="apple-studio-card p-8 sm:p-12 bg-white border border-black/8 shadow-sm">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pb-6 border-b border-black/8">
+              <div>
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0f766e] bg-teal-50 px-3 py-1 rounded-full border border-teal-600/20 mb-2">
+                  <ShieldCheck size={14} />
+                  {isRtl ? 'دليل توثيق الآيفون السريع' : 'Fast iPhone Enrollment Guide'}
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1d1d1f]">
+                  {isRtl ? 'كيف توثق جهازك الآيفون بـ 3 خطوات بسيطة؟' : 'How to enroll your iOS device in 3 steps'}
+                </h2>
+              </div>
+              <a
+                href="https://ios-store-production.up.railway.app/api/udid/mobileconfig"
+                onClick={playClick}
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[#0f766e] text-white font-bold text-xs hover:bg-[#115e59] transition shadow-md shrink-0"
+              >
+                <Download size={15} />
+                <span>{isRtl ? 'بدء تنزيل ملف التوثيق' : 'Download MobileConfig Profile'}</span>
+              </a>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="p-6 rounded-2xl bg-[#f8fafc] border border-black/8 flex flex-col justify-between">
+                <div>
+                  <div className="w-10 h-10 rounded-2xl bg-[#0f766e] text-white flex items-center justify-center font-bold text-sm mb-4">
+                    01
+                  </div>
+                  <h3 className="text-base font-extrabold text-[#1d1d1f] mb-2">
+                    {isRtl ? 'تنزيل ملف التعريف' : '1. Download Profile'}
+                  </h3>
+                  <p className="text-xs text-[#515154] leading-relaxed">
+                    {isRtl
+                      ? 'اضغط على زر التوثيق عبر متصفح Safari واضغط "سماح" لتنزيل ملف التعريف الآمن لجهازك.'
+                      : 'Tap the enroll button in Safari and allow downloading the encrypted configuration profile.'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-6 rounded-2xl bg-[#f8fafc] border border-black/8 flex flex-col justify-between">
+                <div>
+                  <div className="w-10 h-10 rounded-2xl bg-[#6366f1] text-white flex items-center justify-center font-bold text-sm mb-4">
+                    02
+                  </div>
+                  <h3 className="text-base font-extrabold text-[#1d1d1f] mb-2">
+                    {isRtl ? 'التثبيت من الإعدادات' : '2. Install in Settings'}
+                  </h3>
+                  <p className="text-xs text-[#515154] leading-relaxed">
+                    {isRtl
+                      ? 'افتح "الإعدادات" في الآيفون واضغط على "تم تنزيل ملف التعريف" ثم اختر "تثبيت" لتأكيد المعرف.'
+                      : 'Open iOS Settings, tap "Profile Downloaded" and confirm install to link hardware UDID.'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-6 rounded-2xl bg-[#f8fafc] border border-black/8 flex flex-col justify-between">
+                <div>
+                  <div className="w-10 h-10 rounded-2xl bg-[#16a34a] text-white flex items-center justify-center font-bold text-sm mb-4">
+                    03
+                  </div>
+                  <h3 className="text-base font-extrabold text-[#1d1d1f] mb-2">
+                    {isRtl ? 'التفعيل وتثبيت المتجر' : '3. Activate & Install'}
+                  </h3>
+                  <p className="text-xs text-[#515154] leading-relaxed">
+                    {isRtl
+                      ? 'يُربط جهازك بالشهادة التوقيعية المعتمدة فورياً، ويصبح جاهزاً لتثبيت كافة التطبيقات والألعاب الموقعة.'
+                      : 'Your device is paired with the enterprise certificate and ready for instant 1-tap app installs.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* VOUCHER CODE REDEMPTION SECTION */}
+        <section id="voucher-section" className="mb-24">
+          <div className="apple-studio-card p-8 sm:p-12 bg-gradient-to-r from-teal-50/50 via-white to-emerald-50/50 border border-teal-600/20 shadow-sm">
+            <div className="max-w-2xl mx-auto text-center">
+              <div className="w-14 h-14 rounded-2xl bg-[#0f766e] text-white flex items-center justify-center mx-auto mb-4 shadow-md">
+                <Ticket size={28} />
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1d1d1f] mb-2">
+                {isRtl ? 'تفعيل كود اشتراك زمام ستور' : 'Redeem ZMAM Voucher Code'}
+              </h2>
+              <p className="text-xs sm:text-sm text-[#515154] mb-8">
+                {isRtl
+                  ? 'إذا استلمت كود اشتراك من إدارة المتجر أو الدعم، أدخله هنا لتأكيد وتفعيل باقتك فورياً.'
+                  : 'Enter your voucher code received from support to activate your VIP subscription instantly.'}
+              </p>
+
+              <form onSubmit={handleRedeemVoucher} className="flex flex-col sm:flex-row items-center gap-3">
+                <input
+                  type="text"
+                  value={voucherCode}
+                  onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
+                  placeholder="ZMAM-XXXX-XXXX"
+                  className="w-full flex-1 px-5 py-3.5 rounded-full border border-black/15 bg-white text-center sm:text-right font-mono text-sm font-bold text-[#1d1d1f] outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-teal-600/20 shadow-sm"
+                  dir="ltr"
+                />
+                <button
+                  type="submit"
+                  disabled={loadingVoucher}
+                  className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#0f766e] text-white font-bold text-xs hover:bg-[#115e59] transition shadow-md disabled:opacity-50 whitespace-nowrap"
+                >
+                  {loadingVoucher ? (isRtl ? 'جاري التحقق...' : 'Checking...') : (isRtl ? 'تفعيل الكود' : 'Redeem')}
+                </button>
+              </form>
+
+              {voucherStatus && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-4 p-3 rounded-2xl bg-white border border-teal-600/30 text-xs font-bold text-[#0f766e]"
+                >
+                  {voucherStatus}
+                </motion.div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* SHOWCASE APPS CATALOG GRID */}
+        <section className="mb-24">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 pb-4 border-b border-black/10">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] font-bold text-[#0f766e] mb-1">
+                {isRtl ? 'مكتبة التطبيقات الموقعة' : 'SIGNED APPS LIBRARY'}
+              </p>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1d1d1f] tracking-tight">
+                {isRtl ? 'أبرز تطبيقات البلس والألعاب المتاحة للتثبيت' : 'Featured Signed Plus Apps & Games'}
+              </h2>
+            </div>
+            <span className="mt-2 md:mt-0 text-xs font-bold text-[#86868b]">
+              {isRtl ? 'تثبيت مباشر OTA عبر الشهادة' : 'Direct OTA Signed Installs'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {showcaseAppsList.map((app, idx) => (
+              <motion.div
+                key={idx}
+                whileHover={{ y: -3 }}
+                className="apple-studio-card p-6 bg-white border border-black/8 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-3 mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-2xl bg-[#f5f5f7] border border-black/5 flex items-center justify-center text-2xl shadow-inner">
+                        {app.icon}
+                      </div>
+                      <div>
+                        <h3 className="text-base font-extrabold text-[#1d1d1f]">{app.name}</h3>
+                        <span className="text-[11px] font-bold text-[#0066cc]">{app.category[lang]}</span>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-bold text-[#0f766e] bg-teal-50 border border-teal-600/20 px-2.5 py-0.5 rounded-full">
+                      {app.tag[lang]}
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-[#515154] leading-relaxed mb-6">
+                    {app.desc[lang]}
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-black/5">
+                  <span className="text-[11px] font-mono text-[#86868b]">{app.version} · {app.size}</span>
+                  <a
+                    href="https://ios-store-production.up.railway.app/api/udid/mobileconfig"
+                    onClick={playClick}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-[#0f766e] hover:underline"
+                  >
+                    <span>{isRtl ? 'توثيق وتثبيت' : 'Enroll to Install'}</span>
+                    <ArrowUpRight size={14} />
+                  </a>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </section>
 
@@ -436,7 +696,7 @@ export default function StorePage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.25 }}
-              className="apple-studio-card p-8 sm:p-12 overflow-hidden relative"
+              className="apple-studio-card p-8 sm:p-12 overflow-hidden relative bg-white border border-black/8 shadow-sm"
             >
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                 {/* Left Col: Specs & Description */}
@@ -560,7 +820,7 @@ export default function StorePage() {
                 key={plan.id}
                 whileHover={{ y: -4 }}
                 transition={{ duration: 0.2 }}
-                className={`apple-studio-card p-7 flex flex-col justify-between relative ${
+                className={`apple-studio-card p-7 flex flex-col justify-between relative border border-black/8 ${
                   plan.highlight ? 'ring-2 ring-[#0f766e] bg-white shadow-xl' : 'bg-white'
                 }`}
               >
@@ -623,7 +883,7 @@ export default function StorePage() {
 
         {/* ZMAM CONSTITUTION SEAL */}
         <section className="mb-24">
-          <div className="apple-studio-card p-8 sm:p-12 text-center bg-gradient-to-b from-white to-[#f7f7f5] border border-black/10">
+          <div className="apple-studio-card p-8 sm:p-12 text-center bg-gradient-to-b from-white to-[#f7f7f5] border border-black/10 shadow-sm">
             <div className="inline-flex items-center gap-2 rounded-full border border-teal-600/30 bg-teal-50 px-4 py-1 text-xs font-bold text-teal-800 mb-6">
               <ShieldCheck size={14} className="text-[#0f766e]" />
               <span>مبادرة أصيلة تحت مظلة منظومة زمام (Project ZMAM)</span>
@@ -654,7 +914,7 @@ export default function StorePage() {
         <section className="text-center">
           <div className="apple-studio-card p-10 sm:p-14 bg-[#1c1f24] text-white relative overflow-hidden">
             <h2 className="text-3xl sm:text-4xl font-extrabold mb-4 tracking-tight">
-              {isRtl ? 'هل أنت مستعد لتثبيت متجر زمام؟' : 'Ready to Install ZMAM Store?'}
+              {isRtl ? 'هل أنت مستعد لتوثيق جهازك وتثبيت المتجر؟' : 'Ready to Enroll & Install ZMAM Store?'}
             </h2>
             <p className="max-w-xl mx-auto text-sm text-neutral-400 leading-relaxed mb-8">
               {isRtl
@@ -664,16 +924,13 @@ export default function StorePage() {
 
             <div className="flex flex-wrap justify-center gap-4">
               <a
-                href="https://ios-store-production.up.railway.app"
-                target="_blank"
-                rel="noreferrer"
+                href="https://ios-store-production.up.railway.app/api/udid/mobileconfig"
                 onClick={playClick}
                 onMouseEnter={playHover}
                 className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#0f766e] text-white font-bold text-sm shadow-md hover:bg-[#115e59] transition"
               >
-                <Smartphone size={16} />
-                <span>{isRtl ? 'الانتقال لصفحة الهبوط للمتجر' : 'Go to Store Landing'}</span>
-                <ExternalLink size={14} />
+                <QrCode size={16} />
+                <span>{isRtl ? 'تنزيل بروفايل التوثيق الآلي' : 'Download UDID Profile'}</span>
               </a>
 
               <a
@@ -685,7 +942,7 @@ export default function StorePage() {
                 className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full border border-white/20 bg-white/5 text-white font-bold text-sm transition hover:bg-white/10"
               >
                 <Send size={15} className="text-[#0088cc]" />
-                <span>{isRtl ? 'محادثة المطور والدعم' : 'Contact Developer'}</span>
+                <span>{isRtl ? 'محادثة الدعم والتفعيل (@Jormunghandr)' : 'Telegram Support'}</span>
               </a>
             </div>
           </div>

@@ -85,63 +85,63 @@ export default function CaseStudyClient() {
       <div className="max-w-4xl mx-auto pb-20">
         <Link
           href="/work"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 text-sm font-semibold text-[var(--gold-light)] mb-8 transition hover:border-white/20"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-black/10 bg-white text-xs font-bold text-[#1d1d1f] mb-8 transition hover:bg-black/5 shadow-sm"
         >
-          <ChevronLeft size={16} />
-          {isRtl ? 'العودة لجميع الأعمال' : 'Back to All Work'}
+          <ChevronLeft size={14} className={isRtl ? 'rotate-180' : ''} />
+          <span>{isRtl ? 'العودة لجميع الأعمال' : 'Back to All Work'}</span>
         </Link>
 
-        <div className="rounded-[32px] border border-white/10 bg-white/5 p-8 sm:p-12 backdrop-blur-xl shadow-2xl">
+        <div className="apple-studio-card p-8 sm:p-12 bg-white border border-black/8 shadow-xl">
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-            <span className="text-xs font-bold uppercase tracking-wider text-[var(--gold)]">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#0066cc] bg-black/5 px-3 py-1 rounded-full border border-black/8">
               {project.year}
             </span>
             <div className="flex gap-2">
               {project.tags.map((t) => (
-                <span key={t} className="px-3 py-1 rounded-full border border-white/10 bg-white/5 text-xs text-[var(--text-secondary)]">
+                <span key={t} className="px-3 py-1 rounded-full border border-black/8 bg-black/5 text-xs text-[#515154] font-medium">
                   {t}
                 </span>
               ))}
             </div>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-extrabold mb-6">
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-[#1d1d1f] mb-6">
             {isRtl ? project.title.ar : project.title.en}
           </h1>
 
-          <p className="text-lg text-[var(--text-secondary)] leading-relaxed mb-10 border-b border-white/10 pb-8">
+          <p className="text-base sm:text-lg text-[#515154] leading-relaxed mb-10 border-b border-black/10 pb-8">
             {isRtl ? project.desc.ar : project.desc.en}
           </p>
 
           <div className="grid gap-8 md:grid-cols-2">
-            <div className="p-6 rounded-2xl border border-white/10 bg-black/20">
-              <h3 className="text-xl font-bold mb-3 text-rose-400">
+            <div className="p-6 rounded-2xl border border-black/8 bg-[#fff5f5]">
+              <h3 className="text-lg font-bold mb-3 text-[#e11d48]">
                 {isRtl ? 'التحدي والمشكلة' : 'The Challenge'}
               </h3>
-              <p className="text-sm text-[var(--text-secondary)] leading-7">
+              <p className="text-sm text-[#515154] leading-7">
                 {isRtl ? content.problem.ar : content.problem.en}
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl border border-white/10 bg-black/20">
-              <h3 className="text-xl font-bold mb-3 text-emerald-400">
+            <div className="p-6 rounded-2xl border border-black/8 bg-[#f0fdf4]">
+              <h3 className="text-lg font-bold mb-3 text-[#16a34a]">
                 {isRtl ? 'الحل الهندسي' : 'The Solution'}
               </h3>
-              <p className="text-sm text-[var(--text-secondary)] leading-7">
+              <p className="text-sm text-[#515154] leading-7">
                 {isRtl ? content.solution.ar : content.solution.en}
               </p>
             </div>
           </div>
 
-          <div className="mt-8 p-6 rounded-2xl border border-white/10 bg-gradient-to-r from-white/5 to-white/0">
-            <h3 className="text-xl font-bold mb-4 text-[var(--gold-light)] flex items-center gap-2">
-              <Sparkles size={20} />
-              {isRtl ? 'النتائج والأثر الملموس' : 'Tangible Impact'}
+          <div className="mt-8 p-6 rounded-2xl border border-black/8 bg-[#f8fafc]">
+            <h3 className="text-lg font-bold mb-4 text-[#0066cc] flex items-center gap-2">
+              <Sparkles size={18} />
+              <span>{isRtl ? 'النتائج والأثر الملموس' : 'Tangible Impact'}</span>
             </h3>
             <ul className="grid gap-3">
               {(isRtl ? content.impact.ar : content.impact.en).map((item, i) => (
-                <li key={i} className="flex items-center gap-3 text-sm text-[var(--text)]">
-                  <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
+                <li key={i} className="flex items-center gap-3 text-sm text-[#1d1d1f]">
+                  <CheckCircle2 size={16} className="text-[#16a34a] shrink-0" />
                   <span>{item}</span>
                 </li>
               ))}
