@@ -8,6 +8,7 @@ import {
   Layers,
   Printer,
   Crown,
+  Smartphone,
   Github,
   MessageSquare,
   ArrowUpRight,
@@ -15,6 +16,14 @@ import {
 import { useInteractiveSounds } from '@/hooks/useInteractiveSounds';
 
 const linkItems = [
+  {
+    title: { ar: 'متجر زمام ستور (ZMAM iOS Store)', en: 'ZMAM Store (Signed iOS Platform)' },
+    subtitle: { ar: 'تطبيقات iOS الموقعة وتوثيق الـ UDID بدون جلبريك', en: 'Enterprise Signed iOS Store & UDID Engine' },
+    href: '/store',
+    color: '#0f766e',
+    icon: Smartphone,
+    isExternal: false,
+  },
   {
     title: { ar: 'دستور مشروع زمام (ZMAM Doctrine)', en: 'Project ZMAM Constitution' },
     subtitle: { ar: 'الإعلان التأسيسي والأعمدة الاستراتيجية', en: 'Founding Declaration & Pillars' },

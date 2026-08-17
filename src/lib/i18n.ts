@@ -10,6 +10,7 @@ export const translations = {
   work: { ar: 'المشاريع', en: 'Projects' },
   cv: { ar: 'السيرة الذاتية', en: 'CV' },
   apps: { ar: 'التطبيقات', en: 'Apps' },
+  store: { ar: 'متجر زمام', en: 'ZMAM Store' },
   zemam: { ar: 'مشروع زمام', en: 'Project ZMAM' },
   warraq: { ar: 'وراق', en: 'Warraq' },
   glamora: { ar: 'جلامورا', en: 'Glamora' },

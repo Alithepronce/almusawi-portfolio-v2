@@ -8,6 +8,7 @@ import {
   Printer,
   Activity,
   Crown,
+  Smartphone,
   Shield,
   Lock,
   Cpu,
@@ -25,6 +26,19 @@ import { useInteractiveSounds } from '@/hooks/useInteractiveSounds';
 const containerClass = 'mx-auto w-full max-w-[1240px] px-4 sm:px-8 lg:px-12';
 
 const ecosystemPillars = [
+  {
+    slug: 'store',
+    title: { ar: 'متجر زمام ستور', en: 'ZMAM Store for iOS' },
+    subtitle: { ar: 'تطبيقات iOS الموقعة والتوزيع السحابي', en: 'Signed iOS Apps & Enterprise Signing' },
+    desc: {
+      ar: 'منظومة متطورة لتوقيع وتثبيت تطبيقات iOS الموقعة بدون جلبريك مع توثيق آلي للـ UDID وتوزيع سحابي عبر R2 ومحرك zsign.',
+      en: 'Enterprise iOS signed apps store featuring zero-jailbreak installs, automated UDID enrollment, and Cloudflare R2 OTA distribution.',
+    },
+    color: '#0f766e',
+    icon: Smartphone,
+    href: '/store',
+    tag: { ar: 'متجر الآيفون', en: 'iOS Store' },
+  },
   {
     slug: 'zemam',
     title: { ar: 'منظومة زمام الذكية', en: 'ZMAM Intelligence Core' },

@@ -14,6 +14,19 @@ export interface Project {
 /** Complete list of projects */
 export const allProjects: Project[] = [
   {
+    slug: 'store',
+    title: { ar: 'متجر زمام ستور / ZMAM iOS Store', en: 'ZMAM Store — Signed iOS Platform' },
+    desc: {
+      ar: 'منظومة توقيع وتوزيع تطبيقات iOS الموقعة بدون جلبريك مع توثيق آلي لمعرف UDID وتوزيع سحابي عبر R2 ومحرك zsign',
+      en: 'Enterprise iOS signed apps store and distribution platform featuring automated UDID enrollment, zsign engine, and Cloudflare R2 OTA installs'
+    },
+    tags: ['SwiftUI', 'Node.js', 'PostgreSQL', 'Cloudflare R2', 'zsign', 'iOS'],
+    color: '#0F766E',
+    year: '2026',
+    hasCase: true,
+    externalHref: '/store',
+  },
+  {
     slug: 'glamora',
     title: { ar: 'تطبيق غلامورا / Glamora POS', en: 'Glamora POS & Inventory' },
     desc: { ar: 'نظام كاشير ومخزون فاخر لمحلات الكوزمتكس والتجميل مع تزامن سحابي حي Supabase وسرية بصمة الوجه Face ID وإدارة الرواتب HR', en: 'Luxury cosmetic POS & inventory system featuring Supabase Realtime sync, Face ID security, and HR payroll engine' },

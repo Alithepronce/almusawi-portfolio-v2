@@ -9,6 +9,19 @@ import { useInteractiveSounds } from '@/hooks/useInteractiveSounds';
 
 const appsCatalog = [
   {
+    slug: 'store',
+    href: '/store',
+    icon: Smartphone,
+    name: { ar: 'متجر زمام ستور (ZMAM Store)', en: 'ZMAM Store (iOS Signed Apps)' },
+    tagline: { ar: 'منظومة تطبيقات iOS الموقعة وتوثيق الـ UDID', en: 'Signed iOS Apps & Automated Signing Engine' },
+    desc: {
+      ar: 'منصة متكاملة لتوقيع وتثبيت تطبيقات iOS والبلس بدون جلبريك مع إدارة الاشتراكات وأكواد التفعيل وتوزيع سحابي فائق السرعة عبر Cloudflare R2 ومحرك zsign.',
+      en: 'Comprehensive iOS signing and distribution ecosystem with zero jailbreak required, instant UDID mobileconfig pairing, and OTA installs.'
+    },
+    color: '#0f766e',
+    tags: ['SwiftUI', 'Node.js', 'zsign', 'PostgreSQL', 'Cloudflare R2', 'iOS']
+  },
+  {
     slug: 'zemam',
     href: '/zemam',
     icon: Layers,
