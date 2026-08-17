@@ -101,7 +101,7 @@ const storeModules = [
     title: { ar: 'تطبيق زمام ستور الأصلي (Native SwiftUI)', en: 'Native SwiftUI StoreApp' },
     subtitle: { ar: 'واجهة iOS أصلية فائقة السرعة مع تثبيت فوري OTA', en: 'Ultra-fast native iOS client with 1-tap OTA installation' },
     desc: {
-      ar: 'تطبيق آيفون مبرمج بلغة SwiftUI النقية، يمنحك تجربة سلسة تشبه App Store الرسمي لتصفح مئات تطبيقات البلس، الألعاب المهكرة، وتطبيقات الإنتاجية مع إدارة التنزيلات والتحديثات التلقائية.',
+      ar: 'تطبيق آيفون مبرمج بلغة SwiftUI النقية، يمنحك تجربة سلسة تشبه App Store الرسمي لتصفح مئات تطبيقات البلس، الألعاب المهكرة، وتطبيقات الإنتاجية مع إدارة التنزيلات والتحديثات التلقائية للمشتركين.',
       en: 'Native SwiftUI iOS application offering an App Store-grade fluid experience for discovering hundreds of signed plus apps, tweaked games, and utilities.'
     },
     icon: Smartphone,
@@ -114,14 +114,14 @@ const storeModules = [
     ],
     previewUI: {
       badge: 'واجهة التطبيق المباشرة',
-      title: 'متجر زمام ستور — حزمة v2.7',
+      title: 'متجر زمام ستور — حزمة v3.8',
       items: [
         { name: 'Instagram Rocket VIP', category: 'بلس وحماية', version: 'v320.0 (موقع)', size: '142 MB' },
         { name: 'WhatsApp Watusi 3 Pro', category: 'أدوات وإنتاجية', version: 'v24.5 (موقع)', size: '118 MB' },
         { name: 'PUBG Mobile Safe Radar', category: 'ألعاب معدلة', version: 'v3.2.0 (VIP)', size: '1.8 GB' },
         { name: 'TikTok Unicorn Pro Max', category: 'وسائط وتنزيل', version: 'v33.1 (موقع)', size: '165 MB' },
       ],
-      status: 'الشهادة التوقيعية: نشطة وموثوقة 100%',
+      status: 'الشهادة التوقيعية: نشطة ومحمية للمشتركين',
     }
   },
   {
@@ -129,8 +129,8 @@ const storeModules = [
     title: { ar: 'محرك التوقيع السحابي المباشر (zsign Engine)', en: 'Real-time zsign Cloud Engine' },
     subtitle: { ar: 'توقيع فوري لملفات IPA السحابية وتوليد Manifest فوري', en: 'Instant on-demand IPA signing with developer certificates' },
     desc: {
-      ar: 'خادم Node.js سحابي متطور مدمج بأداة zsign فائقة الأداء. يقوم بحقن ملف التعريف mobileprovision والشهادة التوقيعية P12 داخل حزمة الـ IPA وتوليد ملف XML Manifest لتثبيت التطبيق على جهازك خلال ثوانٍ معدودة.',
-      en: 'High-performance Node.js signing pipeline utilizing zsign to inject mobileprovision and P12 enterprise certificates, generating instant itms-services OTA manifests.'
+      ar: 'خادم Node.js سحابي متطور مدمج بأداة zsign فائقة الأداء. يقوم بحقن ملف التعريف mobileprovision والشهادة التوقيعية P12 داخل حزمة الـ IPA وتوليد ملف XML Manifest لتثبيت التطبيق على أجهزة المشتركين المعتمدة.',
+      en: 'High-performance Node.js signing pipeline utilizing zsign to inject mobileprovision and P12 enterprise certificates, generating instant itms-services OTA manifests for active subscribers.'
     },
     icon: Cpu,
     color: '#6366f1',
@@ -144,39 +144,39 @@ const storeModules = [
       badge: 'سير عمليات التوقيع الحي',
       title: 'محطة التوقيع السحابي #01',
       items: [
-        { name: '1. استلام طلب التوقيع للمستخدم', category: 'API Handshake', version: '200 OK', size: '0.1s' },
+        { name: '1. استلام طلب التوقيع للمشترك', category: 'Subscription Verified', version: '200 OK', size: '0.1s' },
         { name: '2. فحص سعة الشهادة والـ UDID', category: 'Cert Match', version: 'موثق', size: '0.2s' },
         { name: '3. معالجة IPA وحقن zsign Bundle', category: 'Binary Signing', version: 'ناجح', size: '1.8s' },
         { name: '4. توليد رابط OTA وتجهيز التثبيت', category: 'R2 Manifest', version: 'جاهز', size: '0.4s' },
       ],
-      status: 'زمن العملية الإجمالي: 2.5 ثانية فقط',
+      status: 'حماية كاملة: التوقيع محصور بحسابات المشتركين فقط',
     }
   },
   {
     id: 'udid',
     title: { ar: 'التوثيق الآلي للأجهزة (UDID MobileConfig)', en: 'Zero-Touch UDID Auto Enrollment' },
-    subtitle: { ar: 'ربط الآيفون بالشهادة التوقيعية بـ 3 خطوات فقط', en: 'Automated Safari mobileconfig payload extraction' },
+    subtitle: { ar: 'ربط الآيفون بالشهادة التوقيعية للمشتركين المعتمدين', en: 'Automated Safari mobileconfig payload extraction' },
     desc: {
-      ar: 'بروتوكول توثيق مبتكر يستخرج معرّف الجهاز الفريد (UDID) عبر بروفايل مشفر يثبته المستخدم في Safari، ليتم ربط الآيفون فورياً بحساب المستخدم وتخصيص مقعد له في شهادة المطورين المعتمدة دون الحاجة لكتابة أو نسخ أي رمز يدوي.',
-      en: 'Effortless Safari profile pairing extracting hardware UDID securely, matching devices to authorized certificates in PostgreSQL without tedious manual input.'
+      ar: 'بروتوكول توثيق مشفر يستخرج معرّف الجهاز الفريد (UDID) عبر بروفايل مخصص للمشترك بعد تفعيل الكود، ليتم ربط الآيفون فورياً بحسابه وتخصيص مقعد له في شهادة المطورين المعتمدة دون الحاجة لكتابة أي رمز يدوي.',
+      en: 'Effortless Safari profile pairing extracting hardware UDID securely for active subscribers, matching devices to authorized certificates in PostgreSQL.'
     },
     icon: QrCode,
     color: '#0891b2',
     zmamFeature: { ar: 'نظام توثيق آمن مع منع إنشاء المعرفات الوهمية', en: 'Strict zero-spoofing cryptographic identity validation' },
     specs: [
-      { label: { ar: 'خطوات التوثيق', en: 'Steps Required' }, val: '3 خطوات فقط' },
+      { label: { ar: 'خطوات التوثيق', en: 'Steps Required' }, val: '3 خطوات بعد الاشتراك' },
       { label: { ar: 'سعة الشهادة', en: 'Cert Capacity' }, val: '100 جهاز / شهادة' },
-      { label: { ar: 'تزامن الحساب', en: 'Account Sync' }, val: 'فوري (Realtime)' },
+      { label: { ar: 'أمان البيانات', en: 'Security' }, val: 'HMAC Signed Tokens' },
     ],
     previewUI: {
       badge: 'مخطط التوثيق الآلي',
-      title: 'مسار تسجيل الجهاز بالستور',
+      title: 'مسار تسجيل جهاز المشترك',
       items: [
-        { name: 'الخطوة 01: تنزيل ملف التوثيق من Safari', category: 'Profile Download', version: 'udid.mobileconfig', size: '1 KB' },
-        { name: 'الخطوة 02: الضغط على تثبيت من الإعدادات', category: 'iOS Settings', version: 'Profile Installed', size: 'آمن' },
-        { name: 'الخطوة 03: تفعيل الحساب وتثبيت المتجر', category: 'Device Linked', version: 'مفعل ونشط', size: 'جاهز' },
+        { name: 'الخطوة 01: تفعيل كود الاشتراك VIP', category: 'Auth Verification', version: 'كود معتمد', size: 'ناجح' },
+        { name: 'الخطوة 02: تنزيل ملف التوثيق المخصص', category: 'Signed Profile', version: 'tokenized', size: '1 KB' },
+        { name: 'الخطوة 03: ربط المعرف وتثبيت المتجر', category: 'Device Linked', version: 'مفعل ونشط', size: 'جاهز' },
       ],
-      status: 'حالة التوثيق: جهاز آيفون مسجل ومعتمد',
+      status: 'نظام آمن: التوثيق يتطلب كود اشتراك نشط',
     }
   },
   {
@@ -212,7 +212,7 @@ const storeModules = [
     title: { ar: 'التخزين السحابي فائق السرعة (Cloudflare R2)', en: 'Cloudflare R2 High-Speed Distribution' },
     subtitle: { ar: 'تنزيل فوري للـ IPAs بدون قيود سرعة وبأعلى معايير الأمان', en: 'Zero egress fee cloud distribution with signed streaming URLs' },
     desc: {
-      ar: 'ربط كامل مع شبكة Cloudflare R2 العالمية لتخزين ملفات التطبيقات الأصلية والموقعة، مما يضمن سرعة تنزيل فائقة في كافة الدول بدون استهلاك نطاق ترددي باهظ، مع روابط تنزيل موقعة ومحمية بـ JWT Secret صارم.',
+      ar: 'ربط كامل مع شبكة Cloudflare R2 العالمية لتخزين ملفات التطبيقات الأصلية والموقعة، مما يضمن سرعة تنزيل فائقة للمشتركين بدون استهلاك نطاق ترددي باهظ، مع روابط تنزيل موقعة ومحمية بـ JWT Secret صارم.',
       en: 'Seamless integration with Cloudflare R2 globally distributed object storage for fast IPA delivery, token-protected streaming, and zero data leakage.'
     },
     icon: Cloud,
@@ -228,7 +228,7 @@ const storeModules = [
       title: 'مستودعات حزم التطبيقات',
       items: [
         { name: 'مستودع حزم التطبيقات الرسمية (Apps Repository)', category: 'Master IPA Storage', version: 'مشفر', size: 'R2 Bucket' },
-        { name: 'مستودع الحزم الموقعة الجاهزة (Signed Cache)', category: 'Instant Cache', version: 'جاهز للتثبيت', size: 'R2 Stream' },
+        { name: 'مستودع الحزم الموقعة الجاهزة (Signed Cache)', category: 'Instant Cache', version: 'للمشتركين', size: 'R2 Stream' },
         { name: 'قاعدة بيانات المشتركين والأجهزة (PostgreSQL)', category: 'Relational DB', version: 'SSL Secured', size: 'Railway DB' },
       ],
       status: 'حالة خوادم التخزين والتوزيع: متصلة ونشطة بنسبة 99.9%',
@@ -332,8 +332,8 @@ export default function StorePage() {
       setLoadingVoucher(false);
       setVoucherStatus(
         isRtl
-          ? 'تم التحقق! لتأكيد الربط بجهازك، يرجى توثيق الـ UDID أدناه وسيقوم النظام بتفعيل باقتك فوراً.'
-          : 'Verified! Please complete UDID enrollment below to activate this device immediately.'
+          ? 'تم التحقق من صحة الكود! افتح تطبيق زمام ستور على جهازك وأدخل الكود ليتم ربط وتوثيق جهازك فورياً.'
+          : 'Voucher valid! Open ZMAM Store on your device and enter the code to activate instant signing.'
       );
     }, 1000);
   };
@@ -371,7 +371,7 @@ export default function StorePage() {
             className="max-w-3xl mx-auto text-base sm:text-lg text-[#515154] leading-relaxed mb-8"
           >
             {isRtl
-              ? 'المنظومة الرقمية الشاملة لتوقيع وتثبيت تطبيقات iOS وألعاب البلس الموقعة بدون جلبريك، مع توثيق آلي للـ UDID وتوزيع سحابي فائق السرعة عبر محرك zsign وCloudflare R2.'
+              ? 'المنظومة الرقمية الشاملة لتوقيع وتثبيت تطبيقات iOS وألعاب البلس الموقعة بدون جلبريك، مع توثيق آمن للأجهزة وتوزيع سحابي فائق السرعة عبر محرك zsign وCloudflare R2 للمشتركين.'
               : 'The comprehensive iOS signing ecosystem delivering jailbreak-free signed apps, automated UDID enrollment, and instant OTA installs powered by zsign and Cloudflare R2.'}
           </motion.p>
 
@@ -382,15 +382,17 @@ export default function StorePage() {
             transition={{ delay: 0.3 }}
             className="flex flex-wrap items-center justify-center gap-4"
           >
-            {/* Primary Action: Direct UDID Profile Download */}
+            {/* Telegram Support & Instant Subscription */}
             <a
-              href="https://ios-store-production.up.railway.app/api/udid/mobileconfig"
+              href="https://t.me/Jormunghandr"
+              target="_blank"
+              rel="noreferrer"
               onClick={playClick}
               onMouseEnter={playHover}
               className="inline-flex min-h-12 items-center gap-2.5 rounded-full bg-[#0f766e] px-8 py-3.5 text-sm font-bold text-white transition hover:bg-[#115e59] shadow-lg"
             >
-              <QrCode size={17} />
-              <span>{isRtl ? 'توثيق الجهاز وتنزيل البروفايل (UDID)' : 'Enroll iPhone (Download Profile)'}</span>
+              <Send size={16} />
+              <span>{isRtl ? 'طلب كود اشتراك وتفعيل (@Jormunghandr)' : 'Get Activation Code via Telegram'}</span>
             </a>
 
             {/* Scroll to Voucher Redemption */}
@@ -404,17 +406,15 @@ export default function StorePage() {
               <span>{isRtl ? 'تفعيل كود اشتراك جاهز' : 'Redeem Voucher Code'}</span>
             </a>
 
-            {/* Telegram Support & Activation Link */}
+            {/* Scroll to Plans */}
             <a
-              href="https://t.me/Jormunghandr"
-              target="_blank"
-              rel="noreferrer"
+              href="#pricing-section"
               onClick={playClick}
               onMouseEnter={playHover}
               className="inline-flex min-h-12 items-center gap-2 rounded-full border border-black/15 bg-white px-7 py-3.5 text-sm font-bold text-[#1d1d1f] transition hover:bg-black/5 shadow-sm"
             >
-              <Send size={15} className="text-[#0088cc]" />
-              <span>{isRtl ? 'الدعم والاشتراكات (@Jormunghandr)' : 'Telegram Support'}</span>
+              <Star size={15} className="text-[#d97706]" />
+              <span>{isRtl ? 'باقات الاشتراك والضمان' : 'Explore Pricing Plans'}</span>
             </a>
           </motion.div>
         </section>
@@ -464,26 +464,26 @@ export default function StorePage() {
           </div>
         </section>
 
-        {/* HOW UDID ENROLLMENT WORKS (3 STEPS) */}
+        {/* HOW TO JOIN & ENROLL (3 STEPS) */}
         <section className="mb-24">
           <div className="apple-studio-card p-8 sm:p-12 bg-white border border-black/8 shadow-sm">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pb-6 border-b border-black/8">
               <div>
                 <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0f766e] bg-teal-50 px-3 py-1 rounded-full border border-teal-600/20 mb-2">
                   <ShieldCheck size={14} />
-                  {isRtl ? 'دليل توثيق الآيفون السريع' : 'Fast iPhone Enrollment Guide'}
+                  {isRtl ? 'مسار الاشتراك والتوثيق الآمن' : 'Secure Subscription & Enrollment'}
                 </span>
                 <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1d1d1f]">
-                  {isRtl ? 'كيف توثق جهازك الآيفون بـ 3 خطوات بسيطة؟' : 'How to enroll your iOS device in 3 steps'}
+                  {isRtl ? 'كيف تشترك وتوثق جهازك بـ 3 خطوات بسيطة؟' : 'How to subscribe and activate in 3 steps'}
                 </h2>
               </div>
               <a
-                href="https://ios-store-production.up.railway.app/api/udid/mobileconfig"
+                href="#pricing-section"
                 onClick={playClick}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[#0f766e] text-white font-bold text-xs hover:bg-[#115e59] transition shadow-md shrink-0"
               >
-                <Download size={15} />
-                <span>{isRtl ? 'بدء تنزيل ملف التوثيق' : 'Download MobileConfig Profile'}</span>
+                <Ticket size={15} />
+                <span>{isRtl ? 'اختيار باقة الاشتراك' : 'Select Subscription Tier'}</span>
               </a>
             </div>
 
@@ -494,12 +494,12 @@ export default function StorePage() {
                     01
                   </div>
                   <h3 className="text-base font-extrabold text-[#1d1d1f] mb-2">
-                    {isRtl ? 'تنزيل ملف التعريف' : '1. Download Profile'}
+                    {isRtl ? 'الحصول على كود الاشتراك' : '1. Get Activation Code'}
                   </h3>
                   <p className="text-xs text-[#515154] leading-relaxed">
                     {isRtl
-                      ? 'اضغط على زر التوثيق عبر متصفح Safari واضغط "سماح" لتنزيل ملف التعريف الآمن لجهازك.'
-                      : 'Tap the enroll button in Safari and allow downloading the encrypted configuration profile.'}
+                      ? 'اختر الباقة المناسبة وتواصل مع الدعم الفني لاستلام كود التفعيل VIP الفوري المعتمد.'
+                      : 'Choose your desired tier and receive your verified VIP voucher code from support.'}
                   </p>
                 </div>
               </div>
@@ -510,12 +510,12 @@ export default function StorePage() {
                     02
                   </div>
                   <h3 className="text-base font-extrabold text-[#1d1d1f] mb-2">
-                    {isRtl ? 'التثبيت من الإعدادات' : '2. Install in Settings'}
+                    {isRtl ? 'تفعيل الكود وتوثيق الـ UDID' : '2. Redeem & Link Device'}
                   </h3>
                   <p className="text-xs text-[#515154] leading-relaxed">
                     {isRtl
-                      ? 'افتح "الإعدادات" في الآيفون واضغط على "تم تنزيل ملف التعريف" ثم اختر "تثبيت" لتأكيد المعرف.'
-                      : 'Open iOS Settings, tap "Profile Downloaded" and confirm install to link hardware UDID.'}
+                      ? 'يتم تفعيل الكود وفتح مسار التوثيق المشفر لربط معرّف جهازك بالشهادة التوقيعية المخصصة لحسابك.'
+                      : 'Redeem your code to generate the signed enrollment link that maps your hardware UDID securely.'}
                   </p>
                 </div>
               </div>
@@ -526,12 +526,12 @@ export default function StorePage() {
                     03
                   </div>
                   <h3 className="text-base font-extrabold text-[#1d1d1f] mb-2">
-                    {isRtl ? 'التفعيل وتثبيت المتجر' : '3. Activate & Install'}
+                    {isRtl ? 'تثبيت المتجر والتطبيقات' : '3. Install Apps & Enjoy'}
                   </h3>
                   <p className="text-xs text-[#515154] leading-relaxed">
                     {isRtl
-                      ? 'يُربط جهازك بالشهادة التوقيعية المعتمدة فورياً، ويصبح جاهزاً لتثبيت كافة التطبيقات والألعاب الموقعة.'
-                      : 'Your device is paired with the enterprise certificate and ready for instant 1-tap app installs.'}
+                      ? 'يصبح جهازك معتمداً لتثبيت تطبيق زمام ستور ومئات تطبيقات البلس والألعاب الموقعة بنقرة واحدة.'
+                      : 'Your device is certified for instant 1-tap installs of signed plus apps and tweaked games.'}
                   </p>
                 </div>
               </div>
@@ -551,8 +551,8 @@ export default function StorePage() {
               </h2>
               <p className="text-xs sm:text-sm text-[#515154] mb-8">
                 {isRtl
-                  ? 'إذا استلمت كود اشتراك من إدارة المتجر أو الدعم، أدخله هنا لتأكيد وتفعيل باقتك فورياً.'
-                  : 'Enter your voucher code received from support to activate your VIP subscription instantly.'}
+                  ? 'إذا استلمت كود اشتراك من إدارة المتجر أو الدعم الفني، أدخله هنا للتحقق من صلاحيته وتفعيل باقتك.'
+                  : 'Enter your voucher code received from support to verify and activate your VIP subscription.'}
               </p>
 
               <form onSubmit={handleRedeemVoucher} className="flex flex-col sm:flex-row items-center gap-3">
@@ -594,11 +594,11 @@ export default function StorePage() {
                 {isRtl ? 'مكتبة التطبيقات الموقعة' : 'SIGNED APPS LIBRARY'}
               </p>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1d1d1f] tracking-tight">
-                {isRtl ? 'أبرز تطبيقات البلس والألعاب المتاحة للتثبيت' : 'Featured Signed Plus Apps & Games'}
+                {isRtl ? 'أبرز تطبيقات البلس والألعاب المتاحة للمشتركين' : 'Featured Signed Plus Apps & Games'}
               </h2>
             </div>
             <span className="mt-2 md:mt-0 text-xs font-bold text-[#86868b]">
-              {isRtl ? 'تثبيت مباشر OTA عبر الشهادة' : 'Direct OTA Signed Installs'}
+              {isRtl ? 'متاحة حصرياً للمشتركين في الباقات' : 'Exclusive to Active VIP Subscribers'}
             </span>
           </div>
 
@@ -633,11 +633,11 @@ export default function StorePage() {
                 <div className="flex items-center justify-between pt-4 border-t border-black/5">
                   <span className="text-[11px] font-mono text-[#86868b]">{app.version} · {app.size}</span>
                   <a
-                    href="https://ios-store-production.up.railway.app/api/udid/mobileconfig"
+                    href="#pricing-section"
                     onClick={playClick}
                     className="inline-flex items-center gap-1 text-xs font-bold text-[#0f766e] hover:underline"
                   >
-                    <span>{isRtl ? 'توثيق وتثبيت' : 'Enroll to Install'}</span>
+                    <span>{isRtl ? 'متاح مع الاشتراك' : 'Included in VIP'}</span>
                     <ArrowUpRight size={14} />
                   </a>
                 </div>
@@ -799,7 +799,7 @@ export default function StorePage() {
         </section>
 
         {/* PRICING & SUBSCRIPTION PACKAGES SECTION */}
-        <section className="mb-24">
+        <section id="pricing-section" className="mb-24">
           <div className="text-center mb-14">
             <p className="text-xs uppercase tracking-[0.2em] font-bold text-[#0f766e] mb-1">
               {isRtl ? 'الباقات والاشتراكات' : 'SUBSCRIPTION PACKAGES'}
@@ -914,35 +914,37 @@ export default function StorePage() {
         <section className="text-center">
           <div className="apple-studio-card p-10 sm:p-14 bg-[#1c1f24] text-white relative overflow-hidden">
             <h2 className="text-3xl sm:text-4xl font-extrabold mb-4 tracking-tight">
-              {isRtl ? 'هل أنت مستعد لتوثيق جهازك وتثبيت المتجر؟' : 'Ready to Enroll & Install ZMAM Store?'}
+              {isRtl ? 'اشترك الآن في زمام ستور' : 'Subscribe to ZMAM Store Today'}
             </h2>
             <p className="max-w-xl mx-auto text-sm text-neutral-400 leading-relaxed mb-8">
               {isRtl
-                ? 'وثّق جهازك الآيفون بلمسة واحدة وابدأ بتصفح وتثبيت مئات التطبيقات الموقعة مباشرة.'
-                : 'Enroll your iPhone in seconds and start downloading hundreds of signed apps directly.'}
+                ? 'احصل على كود التفعيل VIP الفوري وابدأ بالاستمتاع بمئات تطبيقات البلس والألعاب الموقعة مع ضمان كامل.'
+                : 'Get your instant VIP voucher code and enjoy hundreds of signed apps with verified warranty.'}
             </p>
 
             <div className="flex flex-wrap justify-center gap-4">
-              <a
-                href="https://ios-store-production.up.railway.app/api/udid/mobileconfig"
-                onClick={playClick}
-                onMouseEnter={playHover}
-                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#0f766e] text-white font-bold text-sm shadow-md hover:bg-[#115e59] transition"
-              >
-                <QrCode size={16} />
-                <span>{isRtl ? 'تنزيل بروفايل التوثيق الآلي' : 'Download UDID Profile'}</span>
-              </a>
-
               <a
                 href="https://t.me/Jormunghandr"
                 target="_blank"
                 rel="noreferrer"
                 onClick={playClick}
                 onMouseEnter={playHover}
+                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#0f766e] text-white font-bold text-sm shadow-md hover:bg-[#115e59] transition"
+              >
+                <Send size={15} className="text-white" />
+                <span>{isRtl ? 'طلب كود التفعيل عبر تليغرام' : 'Contact Telegram Support'}</span>
+              </a>
+
+              <a
+                href="https://wa.me/9647767625001"
+                target="_blank"
+                rel="noreferrer"
+                onClick={playClick}
+                onMouseEnter={playHover}
                 className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full border border-white/20 bg-white/5 text-white font-bold text-sm transition hover:bg-white/10"
               >
-                <Send size={15} className="text-[#0088cc]" />
-                <span>{isRtl ? 'محادثة الدعم والتفعيل (@Jormunghandr)' : 'Telegram Support'}</span>
+                <Smartphone size={15} className="text-emerald-400" />
+                <span>{isRtl ? 'التواصل عبر الواتساب' : 'WhatsApp Support'}</span>
               </a>
             </div>
           </div>
