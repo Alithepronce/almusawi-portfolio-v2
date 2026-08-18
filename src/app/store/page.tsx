@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import PageShell from '@/components/ui/PageShell';
@@ -33,8 +33,21 @@ import {
   Key,
   Shield,
   HelpCircle,
+  User,
+  UserPlus,
+  LogIn,
+  LogOut,
+  Copy,
+  Check,
+  AlertTriangle,
+  Phone,
+  Mail,
+  X,
+  FileCode,
 } from 'lucide-react';
 import { useInteractiveSounds } from '@/hooks/useInteractiveSounds';
+
+const API_BASE_URL = 'https://ios-store-production.up.railway.app';
 
 // Showcase apps catalog directly available in ZMAM Store
 const showcaseAppsList = [
@@ -317,6 +330,215 @@ export default function StorePage() {
   const [voucherStatus, setVoucherStatus] = useState<string | null>(null);
   const [loadingVoucher, setLoadingVoucher] = useState(false);
 
+  // Auth & UDID States
+  const [capturedUdid, setCapturedUdid] = useState('');
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [certifiedAlert, setCertifiedAlert] = useState<{ active: boolean; name?: string; udid?: string }>({ active: false });
+
+  // User state
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [userDevice, setUserDevice] = useState<any>(null);
+  const [isCertifiedUser, setIsCertifiedUser] = useState(false);
+
+  // Registration form
+  const [regFullName, setRegFullName] = useState('');
+  const [regUsername, setRegUsername] = useState('');
+  const [regPhone, setRegPhone] = useState('');
+  const [regEmail, setRegEmail] = useState('');
+  const [regPassword, setRegPassword] = useState('');
+  const [regConfirmPassword, setRegConfirmPassword] = useState('');
+  const [regUdid, setRegUdid] = useState('');
+  const [regTerms, setRegTerms] = useState(true);
+  const [regLoading, setRegLoading] = useState(false);
+  const [regError, setRegError] = useState<string | null>(null);
+
+  // Login form
+  const [loginIdentifier, setLoginIdentifier] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+
+  // Copy helper
+  const [copiedUdid, setCopiedUdid] = useState(false);
+
+  // Parse URL search params on mount
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const urlUdid = params.get('udid') || '';
+    const urlStatus = params.get('status') || '';
+    const urlAction = params.get('action') || '';
+    const urlName = params.get('name') || '';
+
+    if (urlUdid) {
+      setCapturedUdid(urlUdid);
+      setRegUdid(urlUdid);
+    }
+
+    if (urlStatus === 'certified') {
+      setCertifiedAlert({ active: true, name: urlName, udid: urlUdid });
+      setIsCertifiedUser(true);
+    }
+
+    if (urlAction === 'register') {
+      setIsRegisterOpen(true);
+    } else if (urlAction === 'login') {
+      setIsLoginOpen(true);
+    }
+
+    // Check stored user session
+    const savedUser = localStorage.getItem('zmam_store_user');
+    const savedToken = localStorage.getItem('zmam_store_token');
+    const savedCertified = localStorage.getItem('zmam_store_certified');
+    if (savedUser && savedToken) {
+      try {
+        setCurrentUser(JSON.parse(savedUser));
+        setIsCertifiedUser(savedCertified === 'true');
+      } catch (e) {}
+    }
+  }, []);
+
+  const copyToClipboard = (text: string) => {
+    playClick();
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedUdid(true);
+      setTimeout(() => setCopiedUdid(false), 2000);
+    });
+  };
+
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    playClick();
+    setRegError(null);
+
+    if (!regFullName.trim()) {
+      setRegError(isRtl ? 'يرجى إدخال الاسم الكامل' : 'Full name is required');
+      return;
+    }
+    if (!regPhone.trim()) {
+      setRegError(isRtl ? 'يرجى إدخال رقم الهاتف' : 'Phone number is required');
+      return;
+    }
+    if (!regEmail.trim()) {
+      setRegError(isRtl ? 'يرجى إدخال البريد الإلكتروني' : 'Email is required');
+      return;
+    }
+    if (regPassword.length < 8) {
+      setRegError(isRtl ? 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' : 'Password must be at least 8 chars');
+      return;
+    }
+    if (regPassword !== regConfirmPassword) {
+      setRegError(isRtl ? 'كلمتا المرور غير متطابقتين' : 'Passwords do not match');
+      return;
+    }
+    if (!regTerms) {
+      setRegError(isRtl ? 'يرجى الموافقة على شروط الخدمة وسياسة الخصوصية' : 'Please agree to terms');
+      return;
+    }
+
+    setRegLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          full_name: regFullName,
+          username: regUsername || undefined,
+          phone: regPhone,
+          email: regEmail,
+          password: regPassword,
+          udid: regUdid.trim() || undefined,
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Registration failed');
+
+      if (data.user && data.token) {
+        localStorage.setItem('zmam_store_user', JSON.stringify(data.user));
+        localStorage.setItem('zmam_store_token', data.token);
+        setCurrentUser(data.user);
+      }
+      if (regUdid.trim()) setCapturedUdid(regUdid.trim());
+
+      setIsRegisterOpen(false);
+      setIsSuccessModalOpen(true);
+    } catch (err: any) {
+      setRegError(err.message || 'حدث خطأ في التسجيل');
+    } finally {
+      setRegLoading(false);
+    }
+  };
+
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    playClick();
+    setLoginError(null);
+
+    if (!loginIdentifier.trim() || !loginPassword) {
+      setLoginError(isRtl ? 'يرجى إدخال البريد أو اسم المستخدم وكلمة المرور' : 'All fields required');
+      return;
+    }
+
+    setLoginLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: loginIdentifier, password: loginPassword })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Login failed');
+
+      localStorage.setItem('zmam_store_user', JSON.stringify(data.user));
+      localStorage.setItem('zmam_store_token', data.token);
+      localStorage.setItem('zmam_store_certified', String(data.is_certified));
+
+      setCurrentUser(data.user);
+      setUserDevice(data.device);
+      setIsCertifiedUser(Boolean(data.is_certified));
+
+      if (data.device?.udid) setCapturedUdid(data.device.udid);
+      setIsLoginOpen(false);
+    } catch (err: any) {
+      setLoginError(err.message || 'حدث خطأ في تسجيل الدخول');
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    playClick();
+    localStorage.removeItem('zmam_store_user');
+    localStorage.removeItem('zmam_store_token');
+    localStorage.removeItem('zmam_store_certified');
+    setCurrentUser(null);
+    setUserDevice(null);
+    setIsCertifiedUser(false);
+  };
+
+  const generateTelegramUrl = (planName: string, planPrice: string) => {
+    const name = currentUser?.full_name || regFullName || 'مشترك زمام ستور';
+    const username = currentUser?.username || regUsername || '—';
+    const email = currentUser?.email || regEmail || '—';
+    const phone = currentUser?.phone || regPhone || '—';
+    const udid = capturedUdid || regUdid || 'بانتظار التوثيق';
+
+    const msg = `السلام عليكم
+أرغب في الاشتراك في ${planName} لمتجر زمام ستور (${planPrice}).
+
+بيانات المشترك:
+- الاسم الكامل: ${name}
+- اسم المستخدم: ${username}
+- البريد الإلكتروني: ${email}
+- رقم الهاتف: ${phone}
+- معرّف الجهاز (UDID): ${udid}`;
+
+    return `https://t.me/Jormunghandr?text=${encodeURIComponent(msg)}`;
+  };
+
   const currentModule = storeModules.find((m) => m.id === activeTab) || storeModules[0];
 
   const handleRedeemVoucher = (e: React.FormEvent) => {
@@ -341,8 +563,46 @@ export default function StorePage() {
   return (
     <PageShell>
       <div className="max-w-6xl mx-auto pb-24 pt-4">
+        {/* CERTIFIED USER PROMINENT BANNER (IF DETECTED) */}
+        {certifiedAlert.active && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 p-6 rounded-3xl bg-gradient-to-r from-emerald-900/30 via-teal-900/20 to-emerald-900/30 border-2 border-emerald-500/40 shadow-xl text-center"
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold mb-3 border border-emerald-500/30">
+              <CheckCircle2 size={15} />
+              <span>مشترك معتمد ومفعل مسبقاً في زمام ستور</span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-extrabold text-[#1d1d1f] dark:text-white mb-2">
+              🎉 أهلاً بك {certifiedAlert.name ? certifiedAlert.name : 'يا بطل'}! جهازك مربوط بشهادة توقيع نشطة
+            </h2>
+            <p className="text-xs sm:text-sm text-[#515154] dark:text-neutral-300 max-w-2xl mx-auto mb-6">
+              تم التحقق من معرّف جهازك واشتراكك النشط. يمكنك الآن تحميل وتثبيت تطبيق زمام ستور مباشرة على جهازك بنقرة واحدة!
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <a
+                href={`${API_BASE_URL}/api/ota/install-latest`}
+                onClick={playClick}
+                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#0f766e] text-white font-bold text-sm shadow-lg hover:bg-[#115e59] transition scale-105"
+              >
+                <Download size={16} />
+                <span>تحميل وتثبيت متجر زمام ستور فوراً (OTA)</span>
+              </a>
+              <a
+                href="storeapp://"
+                onClick={playClick}
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-white dark:bg-neutral-800 border border-black/10 text-xs font-bold text-[#1d1d1f] dark:text-white hover:bg-black/5"
+              >
+                <Smartphone size={15} className="text-[#0f766e]" />
+                <span>فتح تطبيق المتجر</span>
+              </a>
+            </div>
+          </motion.div>
+        )}
+
         {/* HERO BANNER */}
-        <section className="text-center mb-16">
+        <section className="text-center mb-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -368,54 +628,163 @@ export default function StorePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="max-w-3xl mx-auto text-base sm:text-lg text-[#515154] leading-relaxed mb-8"
+            className="max-w-3xl mx-auto text-base sm:text-lg text-[#515154] leading-relaxed mb-10"
           >
             {isRtl
               ? 'المنظومة الرقمية الشاملة لتوقيع وتثبيت تطبيقات iOS وألعاب البلس الموقعة بدون جلبريك، مع توثيق آمن للأجهزة وتوزيع سحابي فائق السرعة عبر محرك zsign وCloudflare R2 للمشتركين.'
               : 'The comprehensive iOS signing ecosystem delivering jailbreak-free signed apps, automated UDID enrollment, and instant OTA installs powered by zsign and Cloudflare R2.'}
           </motion.p>
 
-          {/* ACTION BUTTONS */}
+          {/* 🌟 3 VIP ONBOARDING & ACTION HUB CARDS 🌟 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="flex flex-wrap items-center justify-center gap-4"
+            className="grid grid-cols-1 md:grid-cols-3 gap-5 text-right mb-12"
           >
-            {/* Telegram Support & Instant Subscription */}
-            <a
-              href="https://t.me/Jormunghandr"
-              target="_blank"
-              rel="noreferrer"
-              onClick={playClick}
-              onMouseEnter={playHover}
-              className="inline-flex min-h-12 items-center gap-2.5 rounded-full bg-[#0f766e] px-8 py-3.5 text-sm font-bold text-white transition hover:bg-[#115e59] shadow-lg"
-            >
-              <Send size={16} />
-              <span>{isRtl ? 'طلب كود اشتراك وتفعيل (@Jormunghandr)' : 'Get Activation Code via Telegram'}</span>
-            </a>
+            {/* CARD 1: UDID PROFILE DOWNLOAD */}
+            <div className="apple-studio-card p-6 bg-gradient-to-b from-teal-50/70 via-white to-white border-2 border-teal-600/30 flex flex-col justify-between shadow-md relative overflow-hidden">
+              <div className="absolute top-0 right-0 left-0 h-1.5 bg-gradient-to-r from-teal-500 to-emerald-500" />
+              <div>
+                <div className="w-12 h-12 rounded-2xl bg-[#0f766e] text-white flex items-center justify-center text-xl mb-4 shadow-md">
+                  <QrCode size={24} />
+                </div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-teal-50 border border-teal-600/20 text-[10px] font-bold text-[#0f766e] mb-2">
+                  <Sparkles size={11} />
+                  <span>الخطوة 01 الأساسية</span>
+                </div>
+                <h3 className="text-lg font-extrabold text-[#1d1d1f] mb-2">
+                  تنزيل ملف توثيق الـ UDID
+                </h3>
+                <p className="text-xs text-[#515154] leading-relaxed mb-6">
+                  حمّل ملف التعريف المباشر لجهازك لاستخراج الـ UDID والتوجيه التلقائي لإنشاء الحساب أو التثبيت المباشر.
+                </p>
+              </div>
 
-            {/* Scroll to Voucher Redemption */}
-            <a
-              href="#voucher-section"
-              onClick={playClick}
-              onMouseEnter={playHover}
-              className="inline-flex min-h-12 items-center gap-2 rounded-full border border-black/15 bg-white px-7 py-3.5 text-sm font-bold text-[#1d1d1f] transition hover:bg-black/5 shadow-sm"
-            >
-              <Ticket size={16} className="text-[#0f766e]" />
-              <span>{isRtl ? 'تفعيل كود اشتراك جاهز' : 'Redeem Voucher Code'}</span>
-            </a>
+              <div>
+                <a
+                  href={`${API_BASE_URL}/api/udid/guest-mobileconfig`}
+                  onClick={playClick}
+                  onMouseEnter={playHover}
+                  className="w-full py-3.5 px-4 rounded-full bg-[#0f766e] text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#115e59] transition shadow-md"
+                >
+                  <Download size={15} />
+                  <span>تنزيل ملف التوثيق (Safari)</span>
+                </a>
+                <p className="text-[10px] text-center text-[#86868b] mt-2">
+                  يفتح في الإعدادات لتثبيت البروفايل آلياً
+                </p>
+              </div>
+            </div>
 
-            {/* Scroll to Plans */}
-            <a
-              href="#pricing-section"
-              onClick={playClick}
-              onMouseEnter={playHover}
-              className="inline-flex min-h-12 items-center gap-2 rounded-full border border-black/15 bg-white px-7 py-3.5 text-sm font-bold text-[#1d1d1f] transition hover:bg-black/5 shadow-sm"
-            >
-              <Star size={15} className="text-[#d97706]" />
-              <span>{isRtl ? 'باقات الاشتراك والضمان' : 'Explore Pricing Plans'}</span>
-            </a>
+            {/* CARD 2: REGISTER ACCOUNT (NO CODE NEEDED) */}
+            <div className="apple-studio-card p-6 bg-white border border-black/10 flex flex-col justify-between shadow-sm">
+              <div>
+                <div className="w-12 h-12 rounded-2xl bg-[#1d1d1f] text-white flex items-center justify-center text-xl mb-4 shadow-md">
+                  <UserPlus size={22} />
+                </div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-neutral-100 text-[10px] font-bold text-[#1d1d1f] mb-2">
+                  <Key size={11} />
+                  <span>بدون كود تفعيل</span>
+                </div>
+                <h3 className="text-lg font-extrabold text-[#1d1d1f] mb-2">
+                  إنشاء حساب جديد
+                </h3>
+                <p className="text-xs text-[#515154] leading-relaxed mb-6">
+                  سجل بياناتك مجاناً للحصول على معرّف حسابك، ثم اختر الباقة المناسبة واطلب التفعيل السريع عبر تيليغرام.
+                </p>
+              </div>
+
+              <div>
+                <button
+                  onClick={() => {
+                    playClick();
+                    setIsRegisterOpen(true);
+                  }}
+                  onMouseEnter={playHover}
+                  className="w-full py-3.5 px-4 rounded-full bg-[#1d1d1f] text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-black transition shadow-sm"
+                >
+                  <UserPlus size={15} />
+                  <span>إنشاء حساب مشترك جديد</span>
+                </button>
+                <p className="text-[10px] text-center text-[#86868b] mt-2">
+                  يستغرق أقل من 30 ثانية
+                </p>
+              </div>
+            </div>
+
+            {/* CARD 3: LOGIN & DIRECT STORE INSTALL */}
+            <div className="apple-studio-card p-6 bg-gradient-to-b from-indigo-50/50 via-white to-white border border-indigo-200/60 flex flex-col justify-between shadow-sm">
+              <div>
+                <div className="w-12 h-12 rounded-2xl bg-[#6366f1] text-white flex items-center justify-center text-xl mb-4 shadow-md">
+                  <LogIn size={22} />
+                </div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-50 border border-indigo-200 text-[10px] font-bold text-[#6366f1] mb-2">
+                  <ShieldCheck size={11} />
+                  <span>المشتركون المعتمدون</span>
+                </div>
+                <h3 className="text-lg font-extrabold text-[#1d1d1f] mb-2">
+                  {currentUser ? `أهلاً، ${currentUser.full_name || currentUser.email}` : 'تسجيل دخول المشتركين'}
+                </h3>
+                <p className="text-xs text-[#515154] leading-relaxed mb-6">
+                  {currentUser
+                    ? (isCertifiedUser
+                      ? 'حسابك موثق ونشط! يمكنك تثبيت تطبيق المتجر فورياً على جهازك.'
+                      : 'حسابك مسجل ولكن بانتظار تفعيل الشهادة.')
+                    : 'سجل دخولك للتحقق من حالة اشتراكك وتثبيت المتجر مباشرة إذا كان جهازك مفعلاً.'}
+                </p>
+              </div>
+
+              <div>
+                {currentUser ? (
+                  <div className="space-y-2">
+                    {isCertifiedUser ? (
+                      <a
+                        href={`${API_BASE_URL}/api/ota/install-latest`}
+                        onClick={playClick}
+                        className="w-full py-3.5 px-4 rounded-full bg-[#10b981] text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#059669] transition shadow-md"
+                      >
+                        <Download size={15} />
+                        <span>تحميل المتجر (StoreApp OTA)</span>
+                      </a>
+                    ) : (
+                      <a
+                        href="#pricing-section"
+                        onClick={playClick}
+                        className="w-full py-3 px-4 rounded-full bg-[#0f766e] text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#115e59] transition"
+                      >
+                        <Ticket size={14} />
+                        <span>طلب تفعيل باقة لاشتراكك</span>
+                      </a>
+                    )}
+                    <button
+                      onClick={handleLogout}
+                      className="w-full py-2 rounded-full border border-black/10 text-[11px] font-bold text-[#86868b] hover:bg-black/5 flex items-center justify-center gap-1.5"
+                    >
+                      <LogOut size={12} />
+                      <span>تسجيل الخروج</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <button
+                      onClick={() => {
+                        playClick();
+                        setIsLoginOpen(true);
+                      }}
+                      onMouseEnter={playHover}
+                      className="w-full py-3.5 px-4 rounded-full bg-[#6366f1] text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#4f46e5] transition shadow-md"
+                    >
+                      <LogIn size={15} />
+                      <span>تسجيل الدخول والتثبيت</span>
+                    </button>
+                    <p className="text-[10px] text-center text-[#86868b] mt-2">
+                      للمشتركين السابقين والمفعلين
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
           </motion.div>
         </section>
 
@@ -950,6 +1319,424 @@ export default function StorePage() {
           </div>
         </section>
       </div>
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          MODAL 1: REGISTER NEW ACCOUNT (NO ACTIVATION CODE NEEDED)
+          ═══════════════════════════════════════════════════════════════════════ */}
+      <AnimatePresence>
+        {isRegisterOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="w-full max-w-lg bg-white dark:bg-[#161b22] rounded-3xl p-6 sm:p-8 shadow-2xl border border-black/10 dark:border-white/10 relative max-h-[90vh] overflow-y-auto"
+            >
+              <button
+                onClick={() => {
+                  playClick();
+                  setIsRegisterOpen(false);
+                }}
+                className="absolute top-5 left-5 w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-[#86868b] hover:text-black dark:hover:text-white"
+              >
+                <X size={16} />
+              </button>
+
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-2xl bg-[#0f766e] text-white flex items-center justify-center shadow-md">
+                  <UserPlus size={22} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-extrabold text-[#1d1d1f] dark:text-white">
+                    إنشاء حساب جديد في زمام ستور
+                  </h3>
+                  <p className="text-xs text-[#86868b]">
+                    بدون كود تفعيل — فقط املأ بياناتك للانضمام فورياً
+                  </p>
+                </div>
+              </div>
+
+              {regError && (
+                <div className="mb-4 p-3 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/40 text-xs font-bold text-red-600 dark:text-red-400 flex items-center gap-2">
+                  <AlertTriangle size={15} />
+                  <span>{regError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleRegisterSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-[#1d1d1f] dark:text-neutral-200 mb-1">
+                      الاسم الكامل *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={regFullName}
+                      onChange={(e) => setRegFullName(e.target.value)}
+                      placeholder="مثال: علي موفق"
+                      className="w-full px-4 py-3 rounded-xl border border-black/15 dark:border-white/15 bg-neutral-50 dark:bg-neutral-800 text-sm font-bold text-[#1d1d1f] dark:text-white outline-none focus:border-[#0f766e]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#1d1d1f] dark:text-neutral-200 mb-1">
+                      اسم المستخدم (Username)
+                    </label>
+                    <input
+                      type="text"
+                      value={regUsername}
+                      onChange={(e) => setRegUsername(e.target.value)}
+                      placeholder="مثال: alipro"
+                      dir="ltr"
+                      className="w-full px-4 py-3 rounded-xl border border-black/15 dark:border-white/15 bg-neutral-50 dark:bg-neutral-800 text-sm font-bold text-[#1d1d1f] dark:text-white outline-none focus:border-[#0f766e]"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-[#1d1d1f] dark:text-neutral-200 mb-1">
+                      رقم الهاتف *
+                    </label>
+                    <input
+                      type="tel"
+                      required
+                      value={regPhone}
+                      onChange={(e) => setRegPhone(e.target.value)}
+                      placeholder="0770xxxxxxx"
+                      dir="ltr"
+                      className="w-full px-4 py-3 rounded-xl border border-black/15 dark:border-white/15 bg-neutral-50 dark:bg-neutral-800 text-sm font-bold text-[#1d1d1f] dark:text-white outline-none focus:border-[#0f766e]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#1d1d1f] dark:text-neutral-200 mb-1">
+                      البريد الإلكتروني *
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={regEmail}
+                      onChange={(e) => setRegEmail(e.target.value)}
+                      placeholder="name@example.com"
+                      dir="ltr"
+                      className="w-full px-4 py-3 rounded-xl border border-black/15 dark:border-white/15 bg-neutral-50 dark:bg-neutral-800 text-sm font-bold text-[#1d1d1f] dark:text-white outline-none focus:border-[#0f766e]"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-[#1d1d1f] dark:text-neutral-200 mb-1">
+                      كلمة المرور * (8 أحرف)
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      minLength={8}
+                      value={regPassword}
+                      onChange={(e) => setRegPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full px-4 py-3 rounded-xl border border-black/15 dark:border-white/15 bg-neutral-50 dark:bg-neutral-800 text-sm font-bold text-[#1d1d1f] dark:text-white outline-none focus:border-[#0f766e]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#1d1d1f] dark:text-neutral-200 mb-1">
+                      تأكيد كلمة المرور *
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      minLength={8}
+                      value={regConfirmPassword}
+                      onChange={(e) => setRegConfirmPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full px-4 py-3 rounded-xl border border-black/15 dark:border-white/15 bg-neutral-50 dark:bg-neutral-800 text-sm font-bold text-[#1d1d1f] dark:text-white outline-none focus:border-[#0f766e]"
+                    />
+                  </div>
+                </div>
+
+                {/* UDID Field */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-bold text-[#1d1d1f] dark:text-neutral-200">
+                      معرّف الجهاز (UDID) — اختياري أو يتم التقاطه
+                    </label>
+                    {capturedUdid && (
+                      <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                        ✓ تم التقاطه تلقائياً
+                      </span>
+                    )}
+                  </div>
+                  <input
+                    type="text"
+                    value={regUdid}
+                    onChange={(e) => setRegUdid(e.target.value)}
+                    placeholder="00008101-000XXXXXXXXXXXXXXXX"
+                    dir="ltr"
+                    className="w-full px-4 py-3 rounded-xl border border-black/15 dark:border-white/15 bg-neutral-50 dark:bg-neutral-800 text-xs font-mono font-bold text-[#1d1d1f] dark:text-white outline-none focus:border-[#0f766e]"
+                  />
+                  <p className="text-[10px] text-[#86868b] mt-1">
+                    إذا لم تكن تعرف الـ UDID، يمكنك تركه فارغاً وتنزيل ملف التوثيق من الصفحة الرئيسية لاحقاً.
+                  </p>
+                </div>
+
+                {/* Terms Agreement */}
+                <label className="flex items-start gap-2.5 cursor-pointer pt-2">
+                  <input
+                    type="checkbox"
+                    checked={regTerms}
+                    onChange={(e) => setRegTerms(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 rounded text-[#0f766e] focus:ring-[#0f766e]"
+                  />
+                  <span className="text-xs text-[#515154] dark:text-neutral-300 leading-relaxed">
+                    أوافق على{' '}
+                    <Link href="/store/terms" className="text-[#0f766e] font-bold underline">شروط الخدمة</Link>
+                    {' '}و{' '}
+                    <Link href="/store/privacy" className="text-[#0f766e] font-bold underline">سياسة الخصوصية</Link>
+                    {' '}لمنظومة زمام.
+                  </span>
+                </label>
+
+                <button
+                  type="submit"
+                  disabled={regLoading}
+                  className="w-full py-4 rounded-full bg-[#0f766e] text-white font-bold text-sm hover:bg-[#115e59] transition shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 mt-4"
+                >
+                  <UserPlus size={16} />
+                  <span>{regLoading ? 'جاري إنشاء الحساب...' : 'إنشاء الحساب واختيار الباقة'}</span>
+                </button>
+
+                <div className="text-center pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playClick();
+                      setIsRegisterOpen(false);
+                      setIsLoginOpen(true);
+                    }}
+                    className="text-xs font-bold text-[#0f766e] hover:underline"
+                  >
+                    لديك حساب بالفعل؟ تسجيل الدخول
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          MODAL 2: SUBSCRIBER LOGIN
+          ═══════════════════════════════════════════════════════════════════════ */}
+      <AnimatePresence>
+        {isLoginOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="w-full max-w-md bg-white dark:bg-[#161b22] rounded-3xl p-6 sm:p-8 shadow-2xl border border-black/10 dark:border-white/10 relative"
+            >
+              <button
+                onClick={() => {
+                  playClick();
+                  setIsLoginOpen(false);
+                }}
+                className="absolute top-5 left-5 w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-[#86868b] hover:text-black dark:hover:text-white"
+              >
+                <X size={16} />
+              </button>
+
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-2xl bg-[#6366f1] text-white flex items-center justify-center shadow-md">
+                  <LogIn size={22} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-extrabold text-[#1d1d1f] dark:text-white">
+                    تسجيل الدخول للمشتركين
+                  </h3>
+                  <p className="text-xs text-[#86868b]">
+                    التحقق من حالة اشتراكك وتثبيت المتجر
+                  </p>
+                </div>
+              </div>
+
+              {loginError && (
+                <div className="mb-4 p-3 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/40 text-xs font-bold text-red-600 dark:text-red-400 flex items-center gap-2">
+                  <AlertTriangle size={15} />
+                  <span>{loginError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleLoginSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-[#1d1d1f] dark:text-neutral-200 mb-1">
+                    البريد الإلكتروني أو اسم المستخدم
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={loginIdentifier}
+                    onChange={(e) => setLoginIdentifier(e.target.value)}
+                    placeholder="name@example.com أو alipro"
+                    dir="ltr"
+                    className="w-full px-4 py-3 rounded-xl border border-black/15 dark:border-white/15 bg-neutral-50 dark:bg-neutral-800 text-sm font-bold text-[#1d1d1f] dark:text-white outline-none focus:border-[#6366f1]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-[#1d1d1f] dark:text-neutral-200 mb-1">
+                    كلمة المرور
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-4 py-3 rounded-xl border border-black/15 dark:border-white/15 bg-neutral-50 dark:bg-neutral-800 text-sm font-bold text-[#1d1d1f] dark:text-white outline-none focus:border-[#6366f1]"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loginLoading}
+                  className="w-full py-4 rounded-full bg-[#6366f1] text-white font-bold text-sm hover:bg-[#4f46e5] transition shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 mt-4"
+                >
+                  <LogIn size={16} />
+                  <span>{loginLoading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}</span>
+                </button>
+
+                <div className="text-center pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playClick();
+                      setIsLoginOpen(false);
+                      setIsRegisterOpen(true);
+                    }}
+                    className="text-xs font-bold text-[#0f766e] hover:underline"
+                  >
+                    ليس لديك حساب؟ إنشاء حساب جديد بدون كود
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          MODAL 3: POST-REGISTRATION SUCCESS & TELEGRAM PLAN SELECTION
+          ═══════════════════════════════════════════════════════════════════════ */}
+      <AnimatePresence>
+        {isSuccessModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="w-full max-w-xl bg-white dark:bg-[#161b22] rounded-3xl p-6 sm:p-8 shadow-2xl border border-teal-600/30 relative max-h-[92vh] overflow-y-auto"
+            >
+              <button
+                onClick={() => {
+                  playClick();
+                  setIsSuccessModalOpen(false);
+                }}
+                className="absolute top-5 left-5 w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-[#86868b] hover:text-black dark:hover:text-white"
+              >
+                <X size={16} />
+              </button>
+
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-3xl mx-auto mb-3 shadow-lg">
+                  🎉
+                </div>
+                <h3 className="text-2xl font-extrabold text-[#1d1d1f] dark:text-white mb-1">
+                  تم إنشاء حسابك بنجاح!
+                </h3>
+                <p className="text-xs text-[#515154] dark:text-neutral-300 max-w-md mx-auto">
+                  حسابك مسجل الآن. اختر باقة الاشتراك للتواصل فوراً مع الدعم الفني عبر تليغرام وتفعيل الشهادة التوقيعية لجهازك.
+                </p>
+              </div>
+
+              {/* UDID Copyable Box */}
+              {(capturedUdid || regUdid) && (
+                <div className="mb-6 p-4 rounded-2xl bg-neutral-50 dark:bg-neutral-900 border border-black/10 dark:border-white/10 text-right">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs font-bold text-[#1d1d1f] dark:text-white flex items-center gap-1.5">
+                      <QrCode size={14} className="text-[#0f766e]" />
+                      <span>معرّف جهازك الخاص (UDID):</span>
+                    </span>
+                    <button
+                      onClick={() => copyToClipboard(capturedUdid || regUdid)}
+                      className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold transition ${
+                        copiedUdid ? 'bg-emerald-600 text-white' : 'bg-black/5 dark:bg-white/10 text-[#1d1d1f] dark:text-white hover:bg-black/10'
+                      }`}
+                    >
+                      {copiedUdid ? <Check size={12} /> : <Copy size={12} />}
+                      <span>{copiedUdid ? 'تم النسخ!' : 'نسخ الـ UDID'}</span>
+                    </button>
+                  </div>
+                  <div className="text-xs font-mono font-bold text-[#0066cc] dark:text-[#38bdf8] break-all direction-ltr text-left select-all bg-white dark:bg-black/40 p-2.5 rounded-xl border border-black/5 dark:border-white/5">
+                    {capturedUdid || regUdid}
+                  </div>
+                </div>
+              )}
+
+              {/* Plans Selection Grid */}
+              <div className="space-y-3 mb-6">
+                <div className="text-xs font-bold text-[#86868b] uppercase tracking-wider">
+                  اضغط على باقتك المطلوبة لفتح تليغرام بالطلب المجهز:
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {pricingPlans.map((plan) => (
+                    <a
+                      key={plan.id}
+                      href={generateTelegramUrl(plan.name[lang], `${plan.price} ${plan.currency[lang]}`)}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={playClick}
+                      className={`p-4 rounded-2xl border flex flex-col justify-between transition hover:scale-[1.02] shadow-sm ${
+                        plan.highlight
+                          ? 'border-[#0f766e] bg-teal-50/40 dark:bg-teal-950/20'
+                          : 'border-black/10 dark:border-white/10 bg-white dark:bg-neutral-800'
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-extrabold text-[#1d1d1f] dark:text-white">
+                            {plan.name[lang]}
+                          </span>
+                          <span className="text-xs font-bold text-[#0f766e]">
+                            {plan.price} {plan.currency[lang]}
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-[#86868b] mb-3">
+                          {plan.period[lang]}
+                        </div>
+                      </div>
+
+                      <div className="inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-full bg-[#0f766e] text-white text-[11px] font-bold">
+                        <Send size={11} />
+                        <span>طلب عبر تليغرام</span>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-neutral-100 dark:bg-neutral-900 text-center text-[11px] text-[#515154] dark:text-neutral-400">
+                💡 فور إتمام الدفع مع الدعم الفني، سيتم تخصيص الشهادة التوقيعية لجهازك وإرسال كود التفعيل لتثبيت المتجر فورياً!
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </PageShell>
   );
 }
