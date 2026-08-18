@@ -539,6 +539,46 @@ export default function StorePage() {
     return `https://t.me/Jormunghandr?text=${encodeURIComponent(msg)}`;
   };
 
+  const [installingStore, setInstallingStore] = useState(false);
+  const [installMsg, setInstallMsg] = useState<string | null>(null);
+
+  const handleInstallStoreApp = async (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    playClick();
+    setInstallingStore(true);
+    setInstallMsg(isRtl ? 'جاري فحص الشهادة وتجهيز رابط التثبيت المباشر...' : 'Preparing direct installation...');
+    try {
+      const token = localStorage.getItem('zmam_store_token') || '';
+      const udid = capturedUdid || regUdid || '';
+      const queryParams = new URLSearchParams();
+      if (token) queryParams.set('token', token);
+      if (udid) queryParams.set('udid', udid);
+
+      const url = `${API_BASE_URL}/api/ota/install-latest?${queryParams.toString()}`;
+
+      // Try fetching manifest JSON first
+      const res = await fetch(url, {
+        headers: { 'Accept': 'application/json' }
+      });
+      const data = await res.json();
+      if (data.install_url) {
+        setInstallMsg(isRtl ? 'تم تجهيز الرابط! جاري فتح نافذة التثبيت على جهازك...' : 'Opening install prompt...');
+        window.location.href = data.install_url;
+      } else {
+        window.location.href = url;
+      }
+    } catch (err) {
+      const token = localStorage.getItem('zmam_store_token') || '';
+      const udid = capturedUdid || regUdid || '';
+      window.location.href = `${API_BASE_URL}/api/ota/install-latest?token=${encodeURIComponent(token)}&udid=${encodeURIComponent(udid)}`;
+    } finally {
+      setTimeout(() => {
+        setInstallingStore(false);
+        setInstallMsg(null);
+      }, 4000);
+    }
+  };
+
   const currentModule = storeModules.find((m) => m.id === activeTab) || storeModules[0];
 
   const handleRedeemVoucher = (e: React.FormEvent) => {
@@ -581,14 +621,14 @@ export default function StorePage() {
               تم التحقق من معرّف جهازك واشتراكك النشط. يمكنك الآن تحميل وتثبيت تطبيق زمام ستور مباشرة على جهازك بنقرة واحدة!
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4">
-              <a
-                href={`${API_BASE_URL}/api/ota/install-latest`}
-                onClick={playClick}
-                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#0f766e] text-white font-bold text-sm shadow-lg hover:bg-[#115e59] transition scale-105"
+              <button
+                onClick={handleInstallStoreApp}
+                disabled={installingStore}
+                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#0f766e] text-white font-bold text-sm shadow-lg hover:bg-[#115e59] transition scale-105 disabled:opacity-60 cursor-pointer"
               >
                 <Download size={16} />
-                <span>تحميل وتثبيت متجر زمام ستور فوراً (OTA)</span>
-              </a>
+                <span>{installingStore ? (installMsg || 'جاري تجهيز التثبيت...') : 'تحميل وتثبيت متجر زمام ستور فوراً (OTA)'}</span>
+              </button>
               <a
                 href="storeapp://"
                 onClick={playClick}
@@ -739,14 +779,14 @@ export default function StorePage() {
                 {currentUser ? (
                   <div className="space-y-2">
                     {isCertifiedUser ? (
-                      <a
-                        href={`${API_BASE_URL}/api/ota/install-latest`}
-                        onClick={playClick}
-                        className="w-full py-3.5 px-4 rounded-full bg-[#10b981] text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#059669] transition shadow-md"
+                      <button
+                        onClick={handleInstallStoreApp}
+                        disabled={installingStore}
+                        className="w-full py-3.5 px-4 rounded-full bg-[#10b981] text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#059669] transition shadow-md disabled:opacity-60 cursor-pointer"
                       >
                         <Download size={15} />
-                        <span>تحميل المتجر (StoreApp OTA)</span>
-                      </a>
+                        <span>{installingStore ? (installMsg || 'جاري تجهيز التثبيت...') : 'تحميل المتجر (StoreApp OTA)'}</span>
+                      </button>
                     ) : (
                       <a
                         href="#pricing-section"
