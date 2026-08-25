@@ -335,6 +335,8 @@ export default function StorePage() {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isActivationModalOpen, setIsActivationModalOpen] = useState(false);
+  const [activationResult, setActivationResult] = useState<{ isBound: boolean; tier?: string; message?: string }>({ isBound: false });
   const [certifiedAlert, setCertifiedAlert] = useState<{ active: boolean; name?: string; udid?: string }>({ active: false });
 
   // User state
@@ -388,7 +390,7 @@ export default function StorePage() {
       setIsLoginOpen(true);
     }
 
-    // Check stored user session
+    // Check stored user session & verify with server
     const savedUser = localStorage.getItem('zmam_store_user');
     const savedToken = localStorage.getItem('zmam_store_token');
     const savedCertified = localStorage.getItem('zmam_store_certified');
@@ -397,6 +399,31 @@ export default function StorePage() {
         setCurrentUser(JSON.parse(savedUser));
         setIsCertifiedUser(savedCertified === 'true');
       } catch (e) {}
+    }
+
+    if (savedToken) {
+      fetch(`${API_BASE_URL}/api/auth/me`, {
+        headers: { Authorization: `Bearer ${savedToken}` }
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data && data.user) {
+            setCurrentUser(data.user);
+            setUserDevice(data.device);
+            const isAct = data.user.status === 'active' || data.subscription?.status === 'active';
+            setIsCertifiedUser(isAct);
+            localStorage.setItem('zmam_store_user', JSON.stringify(data.user));
+            localStorage.setItem('zmam_store_certified', String(isAct));
+            if (isAct) {
+              setCertifiedAlert({
+                active: true,
+                name: data.user.full_name,
+                udid: data.device?.udid
+              });
+            }
+          }
+        })
+        .catch(() => {});
     }
   }, []);
 
@@ -581,23 +608,106 @@ export default function StorePage() {
 
   const currentModule = storeModules.find((m) => m.id === activeTab) || storeModules[0];
 
-  const handleRedeemVoucher = (e: React.FormEvent) => {
+  const triggerAutoUDIDEnrollment = async () => {
+    playClick();
+    const token = localStorage.getItem('zmam_store_token');
+    if (!token) {
+      setIsLoginOpen(true);
+      return;
+    }
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/udid/profile-link`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        window.location.href = `${API_BASE_URL}/api/udid/mobileconfig`;
+      }
+    } catch {
+      window.location.href = `${API_BASE_URL}/api/udid/mobileconfig`;
+    }
+  };
+
+  const handleRedeemVoucher = async (e: React.FormEvent) => {
     e.preventDefault();
     playClick();
-    if (!voucherCode.trim()) {
+    const code = voucherCode.trim();
+    if (!code) {
       setVoucherStatus(isRtl ? 'يرجى إدخال كود التفعيل أولاً.' : 'Please enter a voucher code first.');
       return;
     }
-    setLoadingVoucher(true);
-    setVoucherStatus(isRtl ? 'جاري التحقق من كود الاشتراك...' : 'Verifying voucher code...');
-    setTimeout(() => {
-      setLoadingVoucher(false);
+
+    const token = localStorage.getItem('zmam_store_token');
+    if (!token) {
+      setIsLoginOpen(true);
       setVoucherStatus(
         isRtl
-          ? 'تم التحقق من صحة الكود! افتح تطبيق زمام ستور على جهازك وأدخل الكود ليتم ربط وتوثيق جهازك فورياً.'
-          : 'Voucher valid! Open ZMAM Store on your device and enter the code to activate instant signing.'
+          ? 'يرجى تسجيل الدخول أو إنشاء حساب أولاً لربط كود التفعيل بحسابك.'
+          : 'Please log in or create an account first to link the voucher to your profile.'
       );
-    }, 1000);
+      return;
+    }
+
+    setLoadingVoucher(true);
+    setVoucherStatus(isRtl ? 'جاري التحقق من كود الاشتراك وتفعيله...' : 'Verifying and activating voucher...');
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/subscriptions/redeem`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ code })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || (isRtl ? 'كود التفعيل غير صالح' : 'Invalid voucher code'));
+
+      // Fetch fresh /auth/me
+      let isRealBound = false;
+      try {
+        const meRes = await fetch(`${API_BASE_URL}/api/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (meRes.ok) {
+          const meData = await meRes.json();
+          setCurrentUser(meData.user);
+          setUserDevice(meData.device);
+          isRealBound = Boolean(
+            meData.device?.udid &&
+              !meData.device?.udid.startsWith('00008101-') &&
+              meData.device?.is_placeholder !== true
+          );
+          setIsCertifiedUser(true);
+          setCertifiedAlert({
+            active: true,
+            name: meData.user?.full_name,
+            udid: meData.device?.udid
+          });
+          localStorage.setItem('zmam_store_user', JSON.stringify(meData.user));
+          localStorage.setItem('zmam_store_certified', 'true');
+        }
+      } catch (err) {
+        setIsCertifiedUser(true);
+        isRealBound = Boolean(data.device_bound);
+      }
+
+      setActivationResult({
+        isBound: isRealBound,
+        tier: data.tier || 'VIP',
+        message: data.message
+      });
+      setIsActivationModalOpen(true);
+      setVoucherCode('');
+      setVoucherStatus(isRtl ? '🎉 تم تفعيل الاشتراك بنجاح!' : '🎉 Subscription activated successfully!');
+    } catch (err: any) {
+      setVoucherStatus(err.message || (isRtl ? 'فشل تفعيل الكود، يرجى التأكد من صحته' : 'Failed to redeem voucher'));
+    } finally {
+      setLoadingVoucher(false);
+    }
   };
 
   return (
@@ -964,6 +1074,42 @@ export default function StorePage() {
                   : 'Enter your voucher code received from support to verify and activate your VIP subscription.'}
               </p>
 
+              {isCertifiedUser && (
+                <div className="mb-6 p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 text-right">
+                  <div>
+                    <div className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 mb-1">
+                      <CheckCircle2 size={14} />
+                      <span>اشتراكك نشط ({currentUser?.tier || 'VIP'})</span>
+                    </div>
+                    <p className="text-xs text-[#515154]">
+                      {userDevice?.udid && !userDevice.udid.startsWith('00008101-') && userDevice.is_placeholder !== true
+                        ? 'جهازك موثّق بالشهادة وجاهز لتثبيت المتجر فوراً.'
+                        : 'يلزم توثيق جهازك بالـ UDID للبدء بتحميل المتجر.'}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    {userDevice?.udid && !userDevice.udid.startsWith('00008101-') && userDevice.is_placeholder !== true ? (
+                      <button
+                        onClick={handleInstallStoreApp}
+                        disabled={installingStore}
+                        className="w-full sm:w-auto px-6 py-2.5 rounded-full bg-[#0f766e] text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#115e59] shadow-md transition whitespace-nowrap cursor-pointer"
+                      >
+                        <Download size={14} />
+                        <span>{installingStore ? (installMsg || 'جاري التثبيت...') : 'تحميل المتجر (OTA)'}</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={triggerAutoUDIDEnrollment}
+                        className="w-full sm:w-auto px-6 py-2.5 rounded-full bg-[#0066cc] text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#0052a3] shadow-md transition whitespace-nowrap cursor-pointer"
+                      >
+                        <QrCode size={14} />
+                        <span>توثيق الآيفون (UDID)</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <form onSubmit={handleRedeemVoucher} className="flex flex-col sm:flex-row items-center gap-3">
                 <input
                   type="text"
@@ -976,7 +1122,7 @@ export default function StorePage() {
                 <button
                   type="submit"
                   disabled={loadingVoucher}
-                  className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#0f766e] text-white font-bold text-xs hover:bg-[#115e59] transition shadow-md disabled:opacity-50 whitespace-nowrap"
+                  className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#0f766e] text-white font-bold text-xs hover:bg-[#115e59] transition shadow-md disabled:opacity-50 whitespace-nowrap cursor-pointer"
                 >
                   {loadingVoucher ? (isRtl ? 'جاري التحقق...' : 'Checking...') : (isRtl ? 'تفعيل الكود' : 'Redeem')}
                 </button>
@@ -1773,6 +1919,88 @@ export default function StorePage() {
               <div className="p-3 rounded-2xl bg-neutral-100 dark:bg-neutral-900 text-center text-[11px] text-[#515154] dark:text-neutral-400">
                 💡 فور إتمام الدفع مع الدعم الفني، سيتم تخصيص الشهادة التوقيعية لجهازك وإرسال كود التفعيل لتثبيت المتجر فورياً!
               </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          MODAL 4: POST-VOUCHER ACTIVATION CELEBRATION & DIRECT DOWNLOAD
+          ═══════════════════════════════════════════════════════════════════════ */}
+      <AnimatePresence>
+        {isActivationModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="w-full max-w-lg bg-white dark:bg-[#161b22] rounded-3xl p-6 sm:p-8 shadow-2xl border border-emerald-500/40 relative max-h-[92vh] overflow-y-auto text-center"
+            >
+              <button
+                onClick={() => {
+                  playClick();
+                  setIsActivationModalOpen(false);
+                }}
+                className="absolute top-5 left-5 w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-[#86868b] hover:text-black dark:hover:text-white"
+              >
+                <X size={16} />
+              </button>
+
+              <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-3xl mx-auto mb-3 shadow-lg">
+                🎉
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold mb-2">
+                <CheckCircle2 size={13} />
+                <span>تم تفعيل الاشتراك ({activationResult.tier || 'VIP'})</span>
+              </div>
+              <h3 className="text-2xl font-extrabold text-[#1d1d1f] dark:text-white mb-2">
+                مبارك! اشتراكك نشط وجاهز
+              </h3>
+              <p className="text-xs sm:text-sm text-[#515154] dark:text-neutral-300 max-w-md mx-auto mb-6">
+                {activationResult.isBound
+                  ? 'تم ربط جهازك بالشهادة التوقيعية بنجاح. يمكنك الآن تنزيل وتثبيت تطبيق متجر زمام ستور فوراً!'
+                  : 'تم تفعيل حسابك بنجاح! تفصلك خطوة أخيرة: تنزيل ملف التوثيق لربط معرّف الآيفون (UDID) بالشهادة التوقيعية لبدء التثبيت.'}
+              </p>
+
+              {activationResult.isBound ? (
+                <div className="space-y-3">
+                  <button
+                    onClick={() => {
+                      setIsActivationModalOpen(false);
+                      handleInstallStoreApp();
+                    }}
+                    disabled={installingStore}
+                    className="w-full py-4 px-6 rounded-full bg-[#0f766e] text-white font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#115e59] transition shadow-lg animate-pulse cursor-pointer"
+                  >
+                    <Download size={18} />
+                    <span>{installingStore ? (installMsg || 'جاري تجهيز التثبيت...') : 'تحميل وتثبيت متجر زمام ستور فوراً (OTA)'}</span>
+                  </button>
+                  <a
+                    href="storeapp://"
+                    onClick={playClick}
+                    className="w-full py-3 px-6 rounded-full bg-black/5 dark:bg-white/10 text-xs font-bold text-[#1d1d1f] dark:text-white flex items-center justify-center gap-2 hover:bg-black/10 transition"
+                  >
+                    <Smartphone size={15} className="text-[#0f766e]" />
+                    <span>فتح التطبيق إذا كان مثبتاً</span>
+                  </a>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <button
+                    onClick={() => {
+                      setIsActivationModalOpen(false);
+                      triggerAutoUDIDEnrollment();
+                    }}
+                    className="w-full py-4 px-6 rounded-full bg-[#0066cc] text-white font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#0052a3] transition shadow-lg animate-pulse cursor-pointer"
+                  >
+                    <QrCode size={18} />
+                    <span>توثيق جهاز الآيفون (تنزيل ملف التعريف) الآن</span>
+                  </button>
+                  <p className="text-[11px] text-[#86868b]">
+                    سيتم تنزيل البروفايل عبر Safari، ثم الذهاب للإعدادات لتثبيته وسيبدأ التحميل تلقائياً.
+                  </p>
+                </div>
+              )}
             </motion.div>
           </div>
         )}
