@@ -342,7 +342,20 @@ export default function StorePage() {
   // User state
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [userDevice, setUserDevice] = useState<any>(null);
+  const [userSubscription, setUserSubscription] = useState<any>(null);
   const [isCertifiedUser, setIsCertifiedUser] = useState(false);
+
+  const hasRealDevice = Boolean(
+    userDevice?.udid &&
+    !userDevice.udid.startsWith('00008101-') &&
+    userDevice.is_placeholder !== true &&
+    userDevice.cert_id
+  );
+
+  const isSubActive = Boolean(
+    currentUser &&
+    (currentUser.status === 'active' || userSubscription?.status === 'active')
+  );
 
   // Registration form
   const [regFullName, setRegFullName] = useState('');
@@ -379,7 +392,7 @@ export default function StorePage() {
       setRegUdid(urlUdid);
     }
 
-    if (urlStatus === 'certified') {
+    if (urlStatus === 'certified' && urlUdid && !urlUdid.startsWith('00008101-')) {
       setCertifiedAlert({ active: true, name: urlName, udid: urlUdid });
       setIsCertifiedUser(true);
     }
@@ -410,16 +423,26 @@ export default function StorePage() {
           if (data && data.user) {
             setCurrentUser(data.user);
             setUserDevice(data.device);
-            const isAct = data.user.status === 'active' || data.subscription?.status === 'active';
+            setUserSubscription(data.subscription);
+            const hasRealDev = Boolean(
+              data.device &&
+              data.device.udid &&
+              !data.device.udid.startsWith('00008101-') &&
+              !data.device.is_placeholder &&
+              data.device.cert_id
+            );
+            const isAct = Boolean(data.is_certified ?? ((data.user.status === 'active' || data.subscription?.status === 'active') && hasRealDev));
             setIsCertifiedUser(isAct);
             localStorage.setItem('zmam_store_user', JSON.stringify(data.user));
             localStorage.setItem('zmam_store_certified', String(isAct));
-            if (isAct) {
+            if (isAct && hasRealDev) {
               setCertifiedAlert({
                 active: true,
                 name: data.user.full_name,
                 udid: data.device?.udid
               });
+            } else {
+              setCertifiedAlert({ active: false, name: '', udid: '' });
             }
           }
         })
@@ -521,13 +544,36 @@ export default function StorePage() {
 
       localStorage.setItem('zmam_store_user', JSON.stringify(data.user));
       localStorage.setItem('zmam_store_token', data.token);
-      localStorage.setItem('zmam_store_certified', String(data.is_certified));
 
       setCurrentUser(data.user);
       setUserDevice(data.device);
-      setIsCertifiedUser(Boolean(data.is_certified));
+      setUserSubscription(data.subscription);
 
-      if (data.device?.udid) setCapturedUdid(data.device.udid);
+      const hasRealDev = Boolean(
+        data.device &&
+        data.device.udid &&
+        !data.device.udid.startsWith('00008101-') &&
+        !data.device.is_placeholder &&
+        data.device.cert_id
+      );
+      const isAct = Boolean(data.is_certified && hasRealDev);
+
+      setIsCertifiedUser(isAct);
+      localStorage.setItem('zmam_store_certified', String(isAct));
+
+      if (isAct && hasRealDev) {
+        setCertifiedAlert({
+          active: true,
+          name: data.user.full_name,
+          udid: data.device?.udid
+        });
+      } else {
+        setCertifiedAlert({ active: false, name: '', udid: '' });
+      }
+
+      if (data.device?.udid && !data.device.udid.startsWith('00008101-')) {
+        setCapturedUdid(data.device.udid);
+      }
       setIsLoginOpen(false);
     } catch (err: any) {
       setLoginError(err.message || 'حدث خطأ في تسجيل الدخول');
@@ -543,7 +589,9 @@ export default function StorePage() {
     localStorage.removeItem('zmam_store_certified');
     setCurrentUser(null);
     setUserDevice(null);
+    setUserSubscription(null);
     setIsCertifiedUser(false);
+    setCertifiedAlert({ active: false, name: '', udid: '' });
   };
 
   const generateTelegramUrl = (planName: string, planPrice: string) => {
@@ -572,14 +620,26 @@ export default function StorePage() {
   const handleInstallStoreApp = async (e?: React.MouseEvent) => {
     if (e) e.preventDefault();
     playClick();
+
+    const realUdid = (userDevice?.udid && !userDevice.udid.startsWith('00008101-') && !userDevice.is_placeholder)
+      ? userDevice.udid
+      : (capturedUdid && !capturedUdid.startsWith('00008101-') ? capturedUdid : (regUdid && !regUdid.startsWith('00008101-') ? regUdid : ''));
+
+    if (!isCertifiedUser || !hasRealDevice || !realUdid) {
+      alert(isRtl
+        ? '⚠️ يلزم توثيق معرّف جهازك (UDID) بالشهادة التوقيعية أولاً قبل التثبيت. يرجى توثيق الجهاز عبر الخطوة 01 أو التواصل مع الإدارة.'
+        : '⚠️ Device UDID and active signing certificate are required before installation. Please complete Step 01 or contact support.');
+      triggerAutoUDIDEnrollment();
+      return;
+    }
+
     setInstallingStore(true);
     setInstallMsg(isRtl ? 'جاري فحص الشهادة وتجهيز رابط التثبيت المباشر...' : 'Preparing direct installation...');
     try {
       const token = localStorage.getItem('zmam_store_token') || '';
-      const udid = capturedUdid || regUdid || '';
       const queryParams = new URLSearchParams();
       if (token) queryParams.set('token', token);
-      if (udid) queryParams.set('udid', udid);
+      if (realUdid) queryParams.set('udid', realUdid);
 
       const url = `${API_BASE_URL}/api/ota/install-latest?${queryParams.toString()}`;
 
@@ -596,8 +656,7 @@ export default function StorePage() {
       }
     } catch (err) {
       const token = localStorage.getItem('zmam_store_token') || '';
-      const udid = capturedUdid || regUdid || '';
-      window.location.href = `${API_BASE_URL}/api/ota/install-latest?token=${encodeURIComponent(token)}&udid=${encodeURIComponent(udid)}`;
+      window.location.href = `${API_BASE_URL}/api/ota/install-latest?token=${encodeURIComponent(token)}&udid=${encodeURIComponent(realUdid)}`;
     } finally {
       setTimeout(() => {
         setInstallingStore(false);
@@ -676,23 +735,30 @@ export default function StorePage() {
           const meData = await meRes.json();
           setCurrentUser(meData.user);
           setUserDevice(meData.device);
+          setUserSubscription(meData.subscription);
           isRealBound = Boolean(
             meData.device?.udid &&
               !meData.device?.udid.startsWith('00008101-') &&
-              meData.device?.is_placeholder !== true
+              meData.device?.is_placeholder !== true &&
+              meData.device?.cert_id
           );
-          setIsCertifiedUser(true);
-          setCertifiedAlert({
-            active: true,
-            name: meData.user?.full_name,
-            udid: meData.device?.udid
-          });
+          setIsCertifiedUser(isRealBound);
+          if (isRealBound) {
+            setCertifiedAlert({
+              active: true,
+              name: meData.user?.full_name,
+              udid: meData.device?.udid
+            });
+            localStorage.setItem('zmam_store_certified', 'true');
+          } else {
+            setCertifiedAlert({ active: false, name: '', udid: '' });
+            localStorage.setItem('zmam_store_certified', 'false');
+          }
           localStorage.setItem('zmam_store_user', JSON.stringify(meData.user));
-          localStorage.setItem('zmam_store_certified', 'true');
         }
       } catch (err) {
-        setIsCertifiedUser(true);
-        isRealBound = Boolean(data.device_bound);
+        setIsCertifiedUser(false);
+        isRealBound = false;
       }
 
       setActivationResult({
@@ -713,8 +779,8 @@ export default function StorePage() {
   return (
     <PageShell>
       <div className="max-w-6xl mx-auto pb-24 pt-4">
-        {/* CERTIFIED USER PROMINENT BANNER (IF DETECTED) */}
-        {certifiedAlert.active && (
+        {/* CERTIFIED USER PROMINENT BANNER (IF DETECTED WITH REAL DEVICE) */}
+        {certifiedAlert.active && hasRealDevice && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -746,6 +812,45 @@ export default function StorePage() {
               >
                 <Smartphone size={15} className="text-[#0f766e]" />
                 <span>فتح تطبيق المتجر</span>
+              </a>
+            </div>
+          </motion.div>
+        )}
+
+        {/* PENDING UDID / CERTIFICATE ENROLLMENT BANNER (IF SUBSCRIBED BUT NO REAL BOUND DEVICE) */}
+        {!certifiedAlert.active && isSubActive && !hasRealDevice && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 p-6 rounded-3xl bg-gradient-to-r from-amber-500/10 via-amber-600/15 to-amber-500/10 border-2 border-amber-500/40 shadow-xl text-center"
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 text-xs font-bold mb-3 border border-amber-500/30">
+              <Sparkles size={15} />
+              <span>اشتراكك نشط — يلزم توثيق معرّف الجهاز (UDID)</span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-extrabold text-[#1d1d1f] dark:text-white mb-2">
+              👋 أهلاً بك {currentUser?.full_name || 'مشترك زمام'}! اشتراكك مفعل ومتبقي خطوة توثيق جهازك
+            </h2>
+            <p className="text-xs sm:text-sm text-[#515154] dark:text-neutral-300 max-w-2xl mx-auto mb-6">
+              لتوقيع تطبيق المتجر خصيصاً لجهاز الآيفون الخاص بك، يلزم استخراج معرّف الـ UDID عبر تنزيل ملف التعريف من سفاري، أو إرسال الـ UDID لإدارة المتجر لربطه بالشهادة فوراً.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <button
+                onClick={triggerAutoUDIDEnrollment}
+                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#0f766e] text-white font-bold text-sm shadow-lg hover:bg-[#115e59] transition scale-105 cursor-pointer"
+              >
+                <Smartphone size={16} />
+                <span>توثيق هذا الآيفون الآن عبر سفاري (UDID)</span>
+              </button>
+              <a
+                href={generateTelegramUrl('تفعيل الشهادة للـ UDID', 'مشترك مفعل')}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={playClick}
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-white dark:bg-neutral-800 border border-black/10 text-xs font-bold text-[#1d1d1f] dark:text-white hover:bg-black/5"
+              >
+                <Send size={15} className="text-[#0088cc]" />
+                <span>إرسال الـ UDID للإدارة عبر تيليغرام</span>
               </a>
             </div>
           </motion.div>
@@ -801,65 +906,107 @@ export default function StorePage() {
                 </div>
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-teal-50 border border-teal-600/20 text-[10px] font-bold text-[#0f766e] mb-2">
                   <Sparkles size={11} />
-                  <span>الخطوة 01 الأساسية</span>
+                  <span>{hasRealDevice ? 'جهازك موثق' : 'الخطوة 01 الأساسية'}</span>
                 </div>
                 <h3 className="text-lg font-extrabold text-[#1d1d1f] mb-2">
-                  تنزيل ملف توثيق الـ UDID
+                  {hasRealDevice ? 'معرّف الجهاز (UDID) موثّق' : 'تنزيل ملف توثيق الـ UDID'}
                 </h3>
                 <p className="text-xs text-[#515154] leading-relaxed mb-6">
-                  حمّل ملف التعريف المباشر لجهازك لاستخراج الـ UDID والتوجيه التلقائي لإنشاء الحساب أو التثبيت المباشر.
+                  {hasRealDevice
+                    ? `جهازك موثق بنجاح بالمعرّف (${userDevice.udid.slice(0, 8)}...${userDevice.udid.slice(-6)})، يمكنك تثبيت التطبيقات فورياً.`
+                    : 'حمّل ملف التعريف المباشر لجهازك لاستخراج الـ UDID والتوجيه التلقائي لإنشاء الحساب أو التثبيت المباشر.'}
                 </p>
               </div>
 
               <div>
-                <a
-                  href={`${API_BASE_URL}/api/udid/guest-mobileconfig`}
-                  onClick={playClick}
-                  onMouseEnter={playHover}
-                  className="w-full py-3.5 px-4 rounded-full bg-[#0f766e] text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#115e59] transition shadow-md"
-                >
-                  <Download size={15} />
-                  <span>تنزيل ملف التوثيق (Safari)</span>
-                </a>
+                {currentUser ? (
+                  <button
+                    onClick={triggerAutoUDIDEnrollment}
+                    onMouseEnter={playHover}
+                    className="w-full py-3.5 px-4 rounded-full bg-[#0f766e] text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#115e59] transition shadow-md cursor-pointer"
+                  >
+                    <Download size={15} />
+                    <span>{hasRealDevice ? 'تحديث ملف توثيق الجهاز' : 'بدء توثيق هذا الجهاز (Safari)'}</span>
+                  </button>
+                ) : (
+                  <a
+                    href={`${API_BASE_URL}/api/udid/guest-mobileconfig`}
+                    onClick={playClick}
+                    onMouseEnter={playHover}
+                    className="w-full py-3.5 px-4 rounded-full bg-[#0f766e] text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#115e59] transition shadow-md"
+                  >
+                    <Download size={15} />
+                    <span>تنزيل ملف التوثيق (Safari)</span>
+                  </a>
+                )}
                 <p className="text-[10px] text-center text-[#86868b] mt-2">
                   يفتح في الإعدادات لتثبيت البروفايل آلياً
                 </p>
               </div>
             </div>
 
-            {/* CARD 2: REGISTER ACCOUNT (NO CODE NEEDED) */}
+            {/* CARD 2: REGISTER ACCOUNT OR SUBSCRIBER STATUS */}
             <div className="apple-studio-card p-6 bg-white border border-black/10 flex flex-col justify-between shadow-sm">
               <div>
                 <div className="w-12 h-12 rounded-2xl bg-[#1d1d1f] text-white flex items-center justify-center text-xl mb-4 shadow-md">
-                  <UserPlus size={22} />
+                  {currentUser ? <ShieldCheck size={22} /> : <UserPlus size={22} />}
                 </div>
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-neutral-100 text-[10px] font-bold text-[#1d1d1f] mb-2">
                   <Key size={11} />
-                  <span>بدون كود تفعيل</span>
+                  <span>{currentUser ? 'بيانات المشترك' : 'بدون كود تفعيل'}</span>
                 </div>
                 <h3 className="text-lg font-extrabold text-[#1d1d1f] mb-2">
-                  إنشاء حساب جديد
+                  {currentUser
+                    ? `حساب: ${currentUser.full_name || currentUser.username || currentUser.email}`
+                    : 'إنشاء حساب جديد'}
                 </h3>
                 <p className="text-xs text-[#515154] leading-relaxed mb-6">
-                  سجل بياناتك مجاناً للحصول على معرّف حسابك، ثم اختر الباقة المناسبة واطلب التفعيل السريع عبر تيليغرام.
+                  {currentUser
+                    ? (isSubActive
+                        ? (hasRealDevice
+                            ? 'اشتراكك وباقة جهازك نشطة بالكامل وتعمل بنجاح على هذا الآيفون.'
+                            : 'اشتراكك مفعل ولكن يلزم ربط معرّف الجهاز (UDID) بالشهادة لبدء التوقيع.')
+                        : 'حسابك مسجل في المنظومة، يمكنك اختيار الباقة وطلب التفعيل السريع.')
+                    : 'سجل بياناتك مجاناً للحصول على معرّف حسابك، ثم اختر الباقة المناسبة واطلب التفعيل السريع عبر تيليغرام.'}
                 </p>
               </div>
 
               <div>
-                <button
-                  onClick={() => {
-                    playClick();
-                    setIsRegisterOpen(true);
-                  }}
-                  onMouseEnter={playHover}
-                  className="w-full py-3.5 px-4 rounded-full bg-[#1d1d1f] text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-black transition shadow-sm"
-                >
-                  <UserPlus size={15} />
-                  <span>إنشاء حساب مشترك جديد</span>
-                </button>
-                <p className="text-[10px] text-center text-[#86868b] mt-2">
-                  يستغرق أقل من 30 ثانية
-                </p>
+                {currentUser ? (
+                  isSubActive && !hasRealDevice ? (
+                    <a
+                      href={generateTelegramUrl('ربط شهادة المشترك', 'مفعل')}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={playClick}
+                      className="w-full py-3.5 px-4 rounded-full bg-[#0088cc] text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#0077b5] transition shadow-sm"
+                    >
+                      <Send size={15} />
+                      <span>إرسال الـ UDID للدعم الفني</span>
+                    </a>
+                  ) : (
+                    <div className="text-center py-3 px-4 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold">
+                      {hasRealDevice ? '✅ الحساب والجهاز معتمدان' : '⚡ اشتراكك قيد المتابعة'}
+                    </div>
+                  )
+                ) : (
+                  <>
+                    <button
+                      onClick={() => {
+                        playClick();
+                        setIsRegisterOpen(true);
+                      }}
+                      onMouseEnter={playHover}
+                      className="w-full py-3.5 px-4 rounded-full bg-[#1d1d1f] text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-black transition shadow-sm cursor-pointer"
+                    >
+                      <UserPlus size={15} />
+                      <span>إنشاء حساب مشترك جديد</span>
+                    </button>
+                    <p className="text-[10px] text-center text-[#86868b] mt-2">
+                      يستغرق أقل من 30 ثانية
+                    </p>
+                  </>
+                )}
               </div>
             </div>
 
@@ -878,9 +1025,11 @@ export default function StorePage() {
                 </h3>
                 <p className="text-xs text-[#515154] leading-relaxed mb-6">
                   {currentUser
-                    ? (isCertifiedUser
+                    ? (isCertifiedUser && hasRealDevice
                       ? 'حسابك موثق ونشط! يمكنك تثبيت تطبيق المتجر فورياً على جهازك.'
-                      : 'حسابك مسجل ولكن بانتظار تفعيل الشهادة.')
+                      : (isSubActive
+                          ? 'اشتراكك نشط! يلزم توثيق جهاز الآيفون (UDID) للبدء بالتحميل المباشر.'
+                          : 'حسابك مسجل ولكن بانتظار تفعيل باقة الاشتراك.'))
                     : 'سجل دخولك للتحقق من حالة اشتراكك وتثبيت المتجر مباشرة إذا كان جهازك مفعلاً.'}
                 </p>
               </div>
@@ -888,7 +1037,7 @@ export default function StorePage() {
               <div>
                 {currentUser ? (
                   <div className="space-y-2">
-                    {isCertifiedUser ? (
+                    {isCertifiedUser && hasRealDevice ? (
                       <button
                         onClick={handleInstallStoreApp}
                         disabled={installingStore}
@@ -896,6 +1045,14 @@ export default function StorePage() {
                       >
                         <Download size={15} />
                         <span>{installingStore ? (installMsg || 'جاري تجهيز التثبيت...') : 'تحميل المتجر (StoreApp OTA)'}</span>
+                      </button>
+                    ) : isSubActive ? (
+                      <button
+                        onClick={triggerAutoUDIDEnrollment}
+                        className="w-full py-3.5 px-4 rounded-full bg-[#0f766e] text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#115e59] transition shadow-md cursor-pointer"
+                      >
+                        <Smartphone size={15} />
+                        <span>توثيق هذا الجهاز (UDID)</span>
                       </button>
                     ) : (
                       <a
@@ -909,7 +1066,7 @@ export default function StorePage() {
                     )}
                     <button
                       onClick={handleLogout}
-                      className="w-full py-2 rounded-full border border-black/10 text-[11px] font-bold text-[#86868b] hover:bg-black/5 flex items-center justify-center gap-1.5"
+                      className="w-full py-2 rounded-full border border-black/10 text-[11px] font-bold text-[#86868b] hover:bg-black/5 flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <LogOut size={12} />
                       <span>تسجيل الخروج</span>
@@ -1074,21 +1231,21 @@ export default function StorePage() {
                   : 'Enter your voucher code received from support to verify and activate your VIP subscription.'}
               </p>
 
-              {isCertifiedUser && (
+              {isSubActive && (
                 <div className="mb-6 p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 text-right">
                   <div>
                     <div className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 mb-1">
                       <CheckCircle2 size={14} />
-                      <span>اشتراكك نشط ({currentUser?.tier || 'VIP'})</span>
+                      <span>اشتراكك نشط ({currentUser?.tier || userSubscription?.tier || 'VIP'})</span>
                     </div>
                     <p className="text-xs text-[#515154]">
-                      {userDevice?.udid && !userDevice.udid.startsWith('00008101-') && userDevice.is_placeholder !== true
+                      {hasRealDevice
                         ? 'جهازك موثّق بالشهادة وجاهز لتثبيت المتجر فوراً.'
-                        : 'يلزم توثيق جهازك بالـ UDID للبدء بتحميل المتجر.'}
+                        : 'اشتراكك مفعل ولكن يلزم توثيق جهازك بالـ UDID للبدء بتحميل المتجر.'}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 w-full sm:w-auto">
-                    {userDevice?.udid && !userDevice.udid.startsWith('00008101-') && userDevice.is_placeholder !== true ? (
+                    {hasRealDevice && isCertifiedUser ? (
                       <button
                         onClick={handleInstallStoreApp}
                         disabled={installingStore}
