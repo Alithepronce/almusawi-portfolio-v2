@@ -255,6 +255,7 @@ const storeModules = [
 const pricingPlans = [
   {
     id: 'basic',
+    days: 30, // تُطابق `duration_days` في جدول plans — لا معرّفات مثبّتة
     name: { ar: 'الباقة الأساسية', en: 'Basic Tier' },
     period: { ar: '30 يوم', en: '30 Days' },
     price: '7,500',
@@ -272,6 +273,7 @@ const pricingPlans = [
   },
   {
     id: 'silver',
+    days: 60, // تُطابق `duration_days` في جدول plans — لا معرّفات مثبّتة
     name: { ar: 'الباقة الفضية', en: 'Silver Tier' },
     period: { ar: '60 يوم', en: '60 Days' },
     price: '13,500',
@@ -289,6 +291,7 @@ const pricingPlans = [
   },
   {
     id: 'gold',
+    days: 150, // تُطابق `duration_days` في جدول plans — لا معرّفات مثبّتة
     name: { ar: 'الباقة الذهبية (VIP)', en: 'Gold VIP Tier' },
     period: { ar: '150 يوم', en: '150 Days' },
     price: '19,500',
@@ -306,6 +309,7 @@ const pricingPlans = [
   },
   {
     id: 'diamond',
+    days: 365, // تُطابق `duration_days` في جدول plans — لا معرّفات مثبّتة
     name: { ar: 'الباقة الماسّية', en: 'Diamond Tier' },
     period: { ar: 'سنة كاملة (365 يوم)', en: '1 Full Year (365 Days)' },
     price: '28,500',
@@ -350,6 +354,9 @@ export default function StorePage() {
   // PHASE-12: مرحلة المستخدم تأتي من الخادم (`/api/auth/me` → `journey`) — لا تُشتقّ هنا.
   // الاشتقاق المحلي (فحص بادئة `00008101-` وغيره) كان يسبّب انحرافاً بين الشاشة والواقع.
   const [journey, setJourney] = useState<any>(null);
+  const [serverPlans, setServerPlans] = useState<any[]>([]);
+  const [myOrders, setMyOrders] = useState<any[]>([]);
+  const [orderPending, setOrderPending] = useState<string | null>(null);
   const [authToken, setAuthToken] = useState<string | null>(null);
   const { enrollment, start: startEnrollment, starting: enrollmentStarting } = useEnrollment(API_BASE_URL, authToken);
 
@@ -419,6 +426,21 @@ export default function StorePage() {
     }
 
     if (savedToken) setAuthToken(savedToken);
+
+    // باقات الخادم (لمطابقة plan_id) — لا نثبّت المعرّفات في الواجهة
+    fetch(`${API_BASE_URL}/api/subscriptions/plans`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (d) setServerPlans(Array.isArray(d) ? d : d.plans || []); })
+      .catch(() => {});
+
+    if (savedToken) {
+      fetch(`${API_BASE_URL}/api/subscriptions/orders/mine`, {
+        headers: { Authorization: `Bearer ${savedToken}` }
+      })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => { if (d?.orders) setMyOrders(d.orders); })
+        .catch(() => {});
+    }
 
     if (savedToken) {
       fetch(`${API_BASE_URL}/api/auth/me`, {
@@ -687,6 +709,71 @@ export default function StorePage() {
     }
   };
 
+  // PHASE-09: كل نية شراء تُسجَّل كطلب برقم مرجعي **قبل** فتح تيليجرام.
+  // سابقاً كان الزر يفتح محادثة برسالة مُعبّأة ولا يترك أي أثر في النظام،
+  // فتبقى الفجوة بين "دفع" و"تفعيل" معتمدة على الذاكرة البشرية.
+  const handlePlanCheckout = async (plan: { id: string; days: number; name: Record<string, string>; price: string; currency: Record<string, string> }) => {
+    playClick();
+    const planLabel = plan.name[lang];
+    const planPrice = `${plan.price} ${plan.currency[lang]}`;
+
+    if (!authToken) {
+      setIsRegisterOpen(true);
+      setFlowNotice({
+        tone: 'info',
+        text: isRtl
+          ? 'أنشئ حسابك أولاً ليُربط طلبك ويُفعَّل اشتراكك تلقائياً فور تأكيد الدفع.'
+          : 'Create your account first so your order is linked and activated automatically once payment is confirmed.'
+      });
+      return;
+    }
+
+    const matched = serverPlans.find((p: any) => Number(p.duration_days) === plan.days);
+    setOrderPending(plan.id);
+    try {
+      let ref: string | null = null;
+      if (matched?.id) {
+        const res = await fetch(`${API_BASE_URL}/api/subscriptions/orders`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+          body: JSON.stringify({ plan_id: matched.id, channel: 'telegram' })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          ref = data.ref;
+          setMyOrders((prev) => [data.order, ...prev.filter((o: any) => o?.id !== data.order?.id)]);
+          setFlowNotice({
+            tone: 'success',
+            text: isRtl
+              ? `تم تسجيل طلبك برقم ${ref}. أرسله مع إثبات الدفع، وسيُفعَّل اشتراكك فور التأكيد — بلا كود يدوي.`
+              : `Order ${ref} recorded. Send it with your payment proof and your subscription activates on confirmation.`
+          });
+        }
+      }
+
+      // رسالة تيليجرام تحمل المرجع فيربط الأدمن الدفع بالحساب بلا تخمين
+      const msg = [
+        'السلام عليكم',
+        `أرغب في الاشتراك في ${planLabel} لمتجر زمام ستور (${planPrice}).`,
+        '',
+        ref ? `رقم الطلب: ${ref}` : '',
+        `الاسم: ${currentUser?.full_name || '—'}`,
+        `البريد: ${currentUser?.email || '—'}`,
+        enrollment.udid || capturedUdid ? `معرّف الجهاز: ${enrollment.udid || capturedUdid}` : ''
+      ].filter(Boolean).join('\n');
+
+      window.open(`https://t.me/Jormunghandr?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
+    } catch {
+      setFlowNotice({
+        tone: 'error',
+        text: isRtl ? 'تعذّر تسجيل الطلب — أعد المحاولة.' : 'Could not record the order — please retry.',
+        action: { label: isRtl ? 'إعادة المحاولة' : 'Retry', run: () => handlePlanCheckout(plan) }
+      });
+    } finally {
+      setOrderPending(null);
+    }
+  };
+
   const currentModule = storeModules.find((m) => m.id === activeTab) || storeModules[0];
 
   // PHASE-08: التوثيق يبدأ بجلسة عمرها 24 ساعة — الضيف مسموح له أيضاً،
@@ -848,6 +935,38 @@ export default function StorePage() {
                 ✕
               </button>
             </div>
+          </div>
+        )}
+
+        {/* PHASE-09: حالة الطلب مرئية للمستخدم — لا انتظار في الظلام */}
+        {myOrders.filter((o: any) => o && ['pending', 'paid'].includes(o.status)).length > 0 && (
+          <div className="mb-6 rounded-3xl border border-sky-400/25 bg-sky-400/[0.07] p-5 backdrop-blur-xl">
+            <h3 className="mb-3 text-sm font-bold text-sky-200">
+              {isRtl ? 'طلباتك الجارية' : 'Your pending orders'}
+            </h3>
+            <ul className="space-y-2">
+              {myOrders
+                .filter((o: any) => o && ['pending', 'paid'].includes(o.status))
+                .map((o: any) => (
+                  <li
+                    key={o.id}
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-white/[0.04] px-4 py-3"
+                  >
+                    <span className="font-mono text-xs text-sky-100">{o.ref || `#${o.id}`}</span>
+                    <span className="text-[11px] text-slate-300">{o.plan_name || ''}</span>
+                    <span className="rounded-full bg-amber-400/15 px-3 py-1 text-[11px] font-bold text-amber-200">
+                      {o.status_label || (o.status === 'paid'
+                        ? (isRtl ? 'تم استلام الدفع — جارٍ التفعيل' : 'Paid — activating')
+                        : (isRtl ? 'بانتظار تأكيد الدفع' : 'Awaiting payment confirmation'))}
+                    </span>
+                  </li>
+                ))}
+            </ul>
+            <p className="mt-3 text-[11px] leading-relaxed text-slate-400">
+              {isRtl
+                ? 'أرسل رقم الطلب مع إثبات الدفع عبر تيليجرام — يُفعَّل اشتراكك فور التأكيد تلقائياً وبلا كود يدوي.'
+                : 'Send the order reference with your payment proof — activation is automatic on confirmation.'}
+            </p>
           </div>
         )}
 
@@ -1645,21 +1764,24 @@ export default function StorePage() {
                   </ul>
                 </div>
 
-                <a
-                  href={`https://t.me/Jormunghandr?text=${encodeURIComponent(plan.telegramText)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={playClick}
+                <button
+                  type="button"
+                  onClick={() => handlePlanCheckout(plan)}
                   onMouseEnter={playHover}
-                  className={`w-full py-3 rounded-full text-xs font-bold text-center transition flex items-center justify-center gap-2 ${
+                  disabled={orderPending === plan.id}
+                  className={`w-full min-h-[44px] py-3 rounded-full text-xs font-bold text-center transition flex items-center justify-center gap-2 disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0f766e] ${
                     plan.highlight
                       ? 'bg-[#0f766e] text-white hover:bg-[#115e59] shadow-md'
                       : 'bg-[#1d1d1f] text-white hover:bg-black'
                   }`}
                 >
                   <Send size={13} />
-                  <span>{isRtl ? 'طلب التفعيل عبر تليغرام' : 'Activate via Telegram'}</span>
-                </a>
+                  <span>
+                    {orderPending === plan.id
+                      ? (isRtl ? 'جارٍ تسجيل طلبك…' : 'Recording your order…')
+                      : (isRtl ? 'طلب التفعيل عبر تليغرام' : 'Activate via Telegram')}
+                  </span>
+                </button>
               </motion.div>
             ))}
           </div>
