@@ -640,6 +640,8 @@ export default function StorePage() {
       const queryParams = new URLSearchParams();
       if (token) queryParams.set('token', token);
       if (realUdid) queryParams.set('udid', realUdid);
+      queryParams.set('fresh', '1');
+      queryParams.set('t', Date.now().toString());
 
       const url = `${API_BASE_URL}/api/ota/install-latest?${queryParams.toString()}`;
 
@@ -656,7 +658,7 @@ export default function StorePage() {
       }
     } catch (err) {
       const token = localStorage.getItem('zmam_store_token') || '';
-      window.location.href = `${API_BASE_URL}/api/ota/install-latest?token=${encodeURIComponent(token)}&udid=${encodeURIComponent(realUdid)}`;
+      window.location.href = `${API_BASE_URL}/api/ota/install-latest?token=${encodeURIComponent(token)}&udid=${encodeURIComponent(realUdid)}&fresh=1&t=${Date.now()}`;
     } finally {
       setTimeout(() => {
         setInstallingStore(false);
