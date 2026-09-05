@@ -46,6 +46,8 @@ import {
   FileCode,
 } from 'lucide-react';
 import { useInteractiveSounds } from '@/hooks/useInteractiveSounds';
+import { useEnrollment } from './_enrollment/useEnrollment';
+import { JourneyRail, type StageKey } from './_enrollment/JourneyRail';
 
 const API_BASE_URL = 'https://ios-store-production.up.railway.app';
 
@@ -345,12 +347,14 @@ export default function StorePage() {
   const [userSubscription, setUserSubscription] = useState<any>(null);
   const [isCertifiedUser, setIsCertifiedUser] = useState(false);
 
-  const hasRealDevice = Boolean(
-    userDevice?.udid &&
-    !userDevice.udid.startsWith('00008101-') &&
-    userDevice.is_placeholder !== true &&
-    userDevice.cert_id
-  );
+  // PHASE-12: مرحلة المستخدم تأتي من الخادم (`/api/auth/me` → `journey`) — لا تُشتقّ هنا.
+  // الاشتقاق المحلي (فحص بادئة `00008101-` وغيره) كان يسبّب انحرافاً بين الشاشة والواقع.
+  const [journey, setJourney] = useState<any>(null);
+  const [authToken, setAuthToken] = useState<string | null>(null);
+  const { enrollment, start: startEnrollment, starting: enrollmentStarting } = useEnrollment(API_BASE_URL, authToken);
+
+  // الجهاز موثّق إن أكّد الخادم ذلك، أو إن أنهت جلسة التوثيق الحالية الربط للتو.
+  const hasRealDevice = Boolean(journey?.device_enrolled) || enrollment.status === 'bound';
 
   const isSubActive = Boolean(
     currentUser &&
@@ -414,6 +418,8 @@ export default function StorePage() {
       } catch (e) {}
     }
 
+    if (savedToken) setAuthToken(savedToken);
+
     if (savedToken) {
       fetch(`${API_BASE_URL}/api/auth/me`, {
         headers: { Authorization: `Bearer ${savedToken}` }
@@ -424,14 +430,10 @@ export default function StorePage() {
             setCurrentUser(data.user);
             setUserDevice(data.device);
             setUserSubscription(data.subscription);
-            const hasRealDev = Boolean(
-              data.device &&
-              data.device.udid &&
-              !data.device.udid.startsWith('00008101-') &&
-              !data.device.is_placeholder &&
-              data.device.cert_id
-            );
-            const isAct = Boolean(data.is_certified ?? ((data.user.status === 'active' || data.subscription?.status === 'active') && hasRealDev));
+            // مصدر الحقيقة الواحد — يُعرض كما هو ولا يُعاد حسابه هنا
+            setJourney(data.journey || null);
+            const hasRealDev = Boolean(data.has_real_device ?? data.journey?.device_enrolled);
+            const isAct = Boolean(data.is_certified);
             setIsCertifiedUser(isAct);
             localStorage.setItem('zmam_store_user', JSON.stringify(data.user));
             localStorage.setItem('zmam_store_certified', String(isAct));
@@ -509,6 +511,7 @@ export default function StorePage() {
       if (data.user && data.token) {
         localStorage.setItem('zmam_store_user', JSON.stringify(data.user));
         localStorage.setItem('zmam_store_token', data.token);
+        setAuthToken(data.token); // يُمكّن الربط التلقائي لجلسة توثيق سابقة (claim)
         setCurrentUser(data.user);
       }
       if (regUdid.trim()) setCapturedUdid(regUdid.trim());
@@ -544,19 +547,16 @@ export default function StorePage() {
 
       localStorage.setItem('zmam_store_user', JSON.stringify(data.user));
       localStorage.setItem('zmam_store_token', data.token);
+      setAuthToken(data.token); // يُمكّن الربط التلقائي لجلسة توثيق سابقة (claim)
 
       setCurrentUser(data.user);
       setUserDevice(data.device);
       setUserSubscription(data.subscription);
+      setJourney(data.journey || null);
 
-      const hasRealDev = Boolean(
-        data.device &&
-        data.device.udid &&
-        !data.device.udid.startsWith('00008101-') &&
-        !data.device.is_placeholder &&
-        data.device.cert_id
-      );
-      const isAct = Boolean(data.is_certified && hasRealDev);
+      // مصدر الحقيقة الواحد — الخادم يقرّر، والعميل يعرض
+      const hasRealDev = Boolean(data.has_real_device ?? data.journey?.device_enrolled);
+      const isAct = Boolean(data.is_certified);
 
       setIsCertifiedUser(isAct);
       localStorage.setItem('zmam_store_certified', String(isAct));
@@ -571,7 +571,7 @@ export default function StorePage() {
         setCertifiedAlert({ active: false, name: '', udid: '' });
       }
 
-      if (data.device?.udid && !data.device.udid.startsWith('00008101-')) {
+      if (hasRealDev && data.device?.udid) {
         setCapturedUdid(data.device.udid);
       }
       setIsLoginOpen(false);
@@ -586,6 +586,9 @@ export default function StorePage() {
     playClick();
     localStorage.removeItem('zmam_store_user');
     localStorage.removeItem('zmam_store_token');
+    setAuthToken(null);
+    setJourney(null);
+    setFlowNotice(null);
     localStorage.removeItem('zmam_store_certified');
     setCurrentUser(null);
     setUserDevice(null);
@@ -614,6 +617,13 @@ export default function StorePage() {
     return `https://t.me/Jormunghandr?text=${encodeURIComponent(msg)}`;
   };
 
+  // إشعار المسار: بديل `alert()` — يحمل دائماً سبباً وخطوة إنقاذ قابلة للنقر.
+  const [flowNotice, setFlowNotice] = useState<{
+    tone: 'info' | 'warn' | 'error' | 'success';
+    text: string;
+    action?: { label: string; run: () => void };
+  } | null>(null);
+
   const [installingStore, setInstallingStore] = useState(false);
   const [installMsg, setInstallMsg] = useState<string | null>(null);
 
@@ -621,15 +631,25 @@ export default function StorePage() {
     if (e) e.preventDefault();
     playClick();
 
-    const realUdid = (userDevice?.udid && !userDevice.udid.startsWith('00008101-') && !userDevice.is_placeholder)
-      ? userDevice.udid
-      : (capturedUdid && !capturedUdid.startsWith('00008101-') ? capturedUdid : (regUdid && !regUdid.startsWith('00008101-') ? regUdid : ''));
+    // معرّف الجهاز يأتي من مصدر موثوق فقط: جلسة التوثيق المكتملة أو الجهاز الذي أكّده الخادم.
+    const realUdid = enrollment.status === 'bound' && enrollment.udid
+      ? enrollment.udid
+      : (journey?.device_enrolled && userDevice?.udid ? userDevice.udid : '');
 
     if (!isCertifiedUser || !hasRealDevice || !realUdid) {
-      alert(isRtl
-        ? '⚠️ يلزم توثيق معرّف جهازك (UDID) بالشهادة التوقيعية أولاً قبل التثبيت. يرجى توثيق الجهاز عبر الخطوة 01 أو التواصل مع الإدارة.'
-        : '⚠️ Device UDID and active signing certificate are required before installation. Please complete Step 01 or contact support.');
-      triggerAutoUDIDEnrollment();
+      // PHASE-12: صفر طرق مسدودة — السبب يأتي من الخادم، ومعه دائماً خطوة إنقاذ.
+      const reason = journey?.blocked_reason
+        || (isRtl
+          ? 'يلزم توثيق معرّف جهازك (UDID) وربطه بشهادة توقيع قبل التثبيت.'
+          : 'Your device UDID must be enrolled and bound to a signing certificate before installing.');
+      const needsSubscription = Boolean(journey?.device_enrolled) && !journey?.subscription_active;
+      setFlowNotice({
+        tone: 'warn',
+        text: reason,
+        action: needsSubscription
+          ? { label: isRtl ? 'تفعيل الاشتراك' : 'Activate subscription', run: () => { setActiveTab('plans'); } }
+          : { label: isRtl ? 'توثيق جهازي الآن' : 'Enroll my device', run: () => triggerAutoUDIDEnrollment() }
+      });
       return;
     }
 
@@ -669,27 +689,23 @@ export default function StorePage() {
 
   const currentModule = storeModules.find((m) => m.id === activeTab) || storeModules[0];
 
+  // PHASE-08: التوثيق يبدأ بجلسة عمرها 24 ساعة — الضيف مسموح له أيضاً،
+  // فالـ UDID يُحفظ في الجلسة ويُربط بحسابه تلقائياً فور تسجيله (بلا إعادة إدخال).
   const triggerAutoUDIDEnrollment = async () => {
     playClick();
-    const token = localStorage.getItem('zmam_store_token');
-    if (!token) {
-      setIsLoginOpen(true);
+    setFlowNotice(null);
+    const url = await startEnrollment();
+    if (url) {
+      window.location.href = url;
       return;
     }
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/udid/profile-link`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        window.location.href = `${API_BASE_URL}/api/udid/mobileconfig`;
-      }
-    } catch {
-      window.location.href = `${API_BASE_URL}/api/udid/mobileconfig`;
-    }
+    setFlowNotice({
+      tone: 'error',
+      text: isRtl
+        ? 'تعذّر بدء جلسة التوثيق. تحقق من اتصالك وأعد المحاولة.'
+        : 'Could not start the enrollment session. Check your connection and retry.',
+      action: { label: isRtl ? 'إعادة المحاولة' : 'Retry', run: () => triggerAutoUDIDEnrollment() }
+    });
   };
 
   const handleRedeemVoucher = async (e: React.FormEvent) => {
@@ -738,12 +754,8 @@ export default function StorePage() {
           setCurrentUser(meData.user);
           setUserDevice(meData.device);
           setUserSubscription(meData.subscription);
-          isRealBound = Boolean(
-            meData.device?.udid &&
-              !meData.device?.udid.startsWith('00008101-') &&
-              meData.device?.is_placeholder !== true &&
-              meData.device?.cert_id
-          );
+          setJourney(meData.journey || null);
+          isRealBound = Boolean(meData.has_real_device ?? meData.journey?.device_enrolled);
           setIsCertifiedUser(isRealBound);
           if (isRealBound) {
             setCertifiedAlert({
@@ -781,6 +793,64 @@ export default function StorePage() {
   return (
     <PageShell>
       <div className="max-w-6xl mx-auto pb-24 pt-4">
+        {/* PHASE-12: المسار الواحد — أين أنا، ما التالي، وماذا أفعل إن تعثّرت */}
+        <JourneyRail
+          isRtl={isRtl}
+          signedIn={Boolean(currentUser)}
+          deviceEnrolled={hasRealDevice}
+          subscriptionActive={Boolean(journey?.subscription_active ?? isSubActive)}
+          canInstall={Boolean(journey?.can_install ?? isCertifiedUser)}
+          enrollmentStatus={enrollment.status}
+          enrollmentUdid={enrollment.udid || capturedUdid || null}
+          blockedReason={journey?.blocked_reason || null}
+          onStageAction={(stage: StageKey) => {
+            if (stage === 'account') setIsRegisterOpen(true);
+            else if (stage === 'device') triggerAutoUDIDEnrollment();
+            else if (stage === 'subscription') setActiveTab('plans');
+            else handleInstallStoreApp();
+          }}
+        />
+
+        {/* إشعار المسار: بديل alert() — سبب صريح + خطوة إنقاذ */}
+        {flowNotice && (
+          <div
+            role="status"
+            aria-live="polite"
+            className={[
+              'mb-6 flex flex-col gap-3 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between',
+              flowNotice.tone === 'error'
+                ? 'border-red-400/40 bg-red-400/10 text-red-200'
+                : flowNotice.tone === 'warn'
+                  ? 'border-amber-400/40 bg-amber-400/10 text-amber-200'
+                  : flowNotice.tone === 'success'
+                    ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-200'
+                    : 'border-sky-400/40 bg-sky-400/10 text-sky-200'
+            ].join(' ')}
+          >
+            <p className="text-[13px] leading-relaxed">{flowNotice.text}</p>
+            <div className="flex shrink-0 items-center gap-2">
+              {flowNotice.action && (
+                <button
+                  type="button"
+                  onClick={() => flowNotice.action?.run()}
+                  disabled={enrollmentStarting}
+                  className="min-h-[40px] rounded-xl bg-white/15 px-4 text-xs font-bold text-white transition-colors hover:bg-white/25 disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
+                >
+                  {enrollmentStarting ? (isRtl ? 'جارٍ التجهيز…' : 'Preparing…') : flowNotice.action.label}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setFlowNotice(null)}
+                aria-label={isRtl ? 'إغلاق الإشعار' : 'Dismiss'}
+                className="min-h-[40px] rounded-xl px-3 text-xs text-white/60 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* CERTIFIED USER PROMINENT BANNER (IF DETECTED WITH REAL DEVICE) */}
         {certifiedAlert.active && hasRealDevice && (
           <motion.div
