@@ -679,17 +679,30 @@ export default function StorePage() {
     setInstallMsg(isRtl ? 'جاري فحص الشهادة وتجهيز رابط التثبيت المباشر...' : 'Preparing direct installation...');
     try {
       const token = localStorage.getItem('zmam_store_token') || '';
+      // PHASE-11: تذكرة تثبيت عمرها 10 دقائق بدل وضع توكن الجلسة (30 يوماً) في الرابط.
+      // التوكن في الـ URL يُسجَّل في سجلات الوكيل وسجل المتصفح وترويسة Referer.
+      let ticket = '';
+      try {
+        const tRes = await fetch(`${API_BASE_URL}/api/ota/install-ticket`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (tRes.ok) ticket = (await tRes.json()).ticket || '';
+      } catch {
+        /* نكمل بترويسة Authorization أدناه */
+      }
+
       const queryParams = new URLSearchParams();
-      if (token) queryParams.set('token', token);
+      if (ticket) queryParams.set('ticket', ticket);
       if (realUdid) queryParams.set('udid', realUdid);
       queryParams.set('fresh', '1');
       queryParams.set('t', Date.now().toString());
 
       const url = `${API_BASE_URL}/api/ota/install-latest?${queryParams.toString()}`;
 
-      // Try fetching manifest JSON first
+      // Try fetching manifest JSON first (الهوية بالترويسة، والتذكرة للانتقال المباشر)
       const res = await fetch(url, {
-        headers: { 'Accept': 'application/json' }
+        headers: { Accept: 'application/json', Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.install_url) {
@@ -699,8 +712,13 @@ export default function StorePage() {
         window.location.href = url;
       }
     } catch (err) {
-      const token = localStorage.getItem('zmam_store_token') || '';
-      window.location.href = `${API_BASE_URL}/api/ota/install-latest?token=${encodeURIComponent(token)}&udid=${encodeURIComponent(realUdid)}&fresh=1&t=${Date.now()}`;
+      setFlowNotice({
+        tone: 'error',
+        text: isRtl
+          ? 'تعذّر تجهيز رابط التثبيت — تحقق من اتصالك وأعد المحاولة.'
+          : 'Could not prepare the install link — check your connection and retry.',
+        action: { label: isRtl ? 'إعادة المحاولة' : 'Retry', run: () => handleInstallStoreApp() }
+      });
     } finally {
       setTimeout(() => {
         setInstallingStore(false);
