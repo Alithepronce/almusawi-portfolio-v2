@@ -1220,12 +1220,12 @@ export default function StorePage() {
             </div>
 
             {/* CARD 3: LOGIN & DIRECT STORE INSTALL */}
-            <div className="apple-studio-card p-6 bg-gradient-to-b from-indigo-50/50 via-white to-white border border-indigo-200/60 flex flex-col justify-between shadow-sm">
+            <div className="apple-studio-card p-6 bg-gradient-to-b bg-white border border-black/10 flex flex-col justify-between shadow-sm">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-[#6366f1] text-white flex items-center justify-center text-xl mb-4 shadow-md">
+                <div className="w-12 h-12 rounded-2xl bg-[#0f766e] text-white flex items-center justify-center text-xl mb-4 shadow-md">
                   <LogIn size={22} />
                 </div>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-50 border border-indigo-200 text-[10px] font-bold text-[#6366f1] mb-2">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-teal-50 border border-teal-600/20 text-[10px] font-bold text-[#0f766e] mb-2">
                   <ShieldCheck size={11} />
                   <span>المشتركون المعتمدون</span>
                 </div>
@@ -1289,7 +1289,7 @@ export default function StorePage() {
                         setIsLoginOpen(true);
                       }}
                       onMouseEnter={playHover}
-                      className="w-full py-3.5 px-4 rounded-full bg-[#6366f1] text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#4f46e5] transition shadow-md"
+                      className="w-full py-3.5 px-4 rounded-full bg-[#0f766e] text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#115e59] transition shadow-md"
                     >
                       <LogIn size={15} />
                       <span>تسجيل الدخول والتثبيت</span>
@@ -1391,7 +1391,7 @@ export default function StorePage() {
 
               <div className="p-6 rounded-2xl bg-[#f8fafc] border border-black/8 flex flex-col justify-between">
                 <div>
-                  <div className="w-10 h-10 rounded-2xl bg-[#6366f1] text-white flex items-center justify-center font-bold text-sm mb-4">
+                  <div className="w-10 h-10 rounded-2xl bg-[#0f766e] text-white flex items-center justify-center font-bold text-sm mb-4">
                     02
                   </div>
                   <h3 className="text-base font-extrabold text-[#1d1d1f] mb-2">
@@ -1511,8 +1511,8 @@ export default function StorePage() {
         <section className="mb-24">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 pb-4 border-b border-black/10">
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] font-bold text-[#0f766e] mb-1">
-                {isRtl ? 'مكتبة التطبيقات الموقعة' : 'SIGNED APPS LIBRARY'}
+              <p className="text-xs font-bold text-[#0f766e] mb-1">
+                {isRtl ? 'مكتبة التطبيقات الموقعة' : 'Signed apps library'}
               </p>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1d1d1f] tracking-tight">
                 {isRtl ? 'أبرز تطبيقات البلس والألعاب المتاحة للمشتركين' : 'Featured Signed Plus Apps & Games'}
@@ -1571,8 +1571,8 @@ export default function StorePage() {
         <section className="mb-24">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 pb-4 border-b border-black/10">
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] font-bold text-[#0f766e] mb-1">
-                {isRtl ? 'الهيكلية والأنظمة المدمجة' : 'SYSTEM ARCHITECTURE & CAPABILITIES'}
+              <p className="text-xs font-bold text-[#0f766e] mb-1">
+                {isRtl ? 'الهيكلية والأنظمة المدمجة' : 'System architecture & capabilities'}
               </p>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1d1d1f] tracking-tight">
                 {isRtl ? 'استعراض الركائز الهندسية لمتجر زمام' : 'Explore Core ZMAM Store Modules'}
@@ -1722,8 +1722,8 @@ export default function StorePage() {
         {/* PRICING & SUBSCRIPTION PACKAGES SECTION */}
         <section id="pricing-section" className="mb-24">
           <div className="text-center mb-14">
-            <p className="text-xs uppercase tracking-[0.2em] font-bold text-[#0f766e] mb-1">
-              {isRtl ? 'الباقات والاشتراكات' : 'SUBSCRIPTION PACKAGES'}
+            <p className="text-xs font-bold text-[#0f766e] mb-1">
+              {isRtl ? 'الباقات والاشتراكات' : 'Subscription packages'}
             </p>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-[#1d1d1f] tracking-tight mb-4">
               {isRtl ? 'اختر باقة الاشتراك المناسبة لجهازك' : 'Choose Your Store Subscription Plan'}
@@ -2106,7 +2106,7 @@ export default function StorePage() {
               </button>
 
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-[#6366f1] text-white flex items-center justify-center shadow-md">
+                <div className="w-12 h-12 rounded-2xl bg-[#0f766e] text-white flex items-center justify-center shadow-md">
                   <LogIn size={22} />
                 </div>
                 <div>
@@ -2138,7 +2138,7 @@ export default function StorePage() {
                     onChange={(e) => setLoginIdentifier(e.target.value)}
                     placeholder="name@example.com أو alipro"
                     dir="ltr"
-                    className="w-full px-4 py-3 rounded-xl border border-black/15 dark:border-white/15 bg-neutral-50 dark:bg-neutral-800 text-sm font-bold text-[#1d1d1f] dark:text-white outline-none focus:border-[#6366f1]"
+                    className="w-full px-4 py-3 rounded-xl border border-black/15 dark:border-white/15 bg-neutral-50 dark:bg-neutral-800 text-sm font-bold text-[#1d1d1f] dark:text-white outline-none focus:border-[#0f766e]"
                   />
                 </div>
 
@@ -2152,14 +2152,14 @@ export default function StorePage() {
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full px-4 py-3 rounded-xl border border-black/15 dark:border-white/15 bg-neutral-50 dark:bg-neutral-800 text-sm font-bold text-[#1d1d1f] dark:text-white outline-none focus:border-[#6366f1]"
+                    className="w-full px-4 py-3 rounded-xl border border-black/15 dark:border-white/15 bg-neutral-50 dark:bg-neutral-800 text-sm font-bold text-[#1d1d1f] dark:text-white outline-none focus:border-[#0f766e]"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={loginLoading}
-                  className="w-full py-4 rounded-full bg-[#6366f1] text-white font-bold text-sm hover:bg-[#4f46e5] transition shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 mt-4"
+                  className="w-full py-4 rounded-full bg-[#0f766e] text-white font-bold text-sm hover:bg-[#115e59] transition shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 mt-4"
                 >
                   <LogIn size={16} />
                   <span>{loginLoading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}</span>
