@@ -95,15 +95,15 @@ export function JourneyRail({
   return (
     <div
       dir={isRtl ? 'rtl' : 'ltr'}
-      className="mb-8 rounded-3xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-xl sm:p-6"
+      className="mb-8 rounded-3xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6"
       aria-label={isRtl ? 'مسار تفعيل حسابك' : 'Activation journey'}
     >
       <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="text-sm font-bold tracking-wide text-emerald-300">
+        <h2 className="text-sm font-bold tracking-wide text-[#0f766e]">
           {isRtl ? 'مسارك خطوة بخطوة' : 'Your journey'}
         </h2>
         {enrollmentUdid && (
-          <span className="truncate font-mono text-[11px] text-slate-400" title={enrollmentUdid}>
+          <span className="truncate font-mono text-[11px] text-gray-400" title={enrollmentUdid}>
             {enrollmentUdid}
           </span>
         )}
@@ -126,12 +126,12 @@ export function JourneyRail({
                 className={[
                   'h-full rounded-2xl border p-3 transition-colors',
                   isDone
-                    ? 'border-emerald-400/40 bg-emerald-400/10'
+                    ? 'border-emerald-300 bg-emerald-50'
                     : isBlocked
-                      ? 'border-red-400/40 bg-red-400/10'
+                      ? 'border-red-300 bg-red-50'
                       : isActive
-                        ? 'border-sky-400/40 bg-sky-400/10'
-                        : 'border-white/10 bg-white/[0.02]'
+                        ? 'border-teal-300 bg-teal-50'
+                        : 'border-gray-200 bg-gray-50'
                 ].join(' ')}
               >
                 <div className="mb-2 flex items-center gap-2">
@@ -139,12 +139,12 @@ export function JourneyRail({
                     className={[
                       'flex h-7 w-7 shrink-0 items-center justify-center rounded-full',
                       isDone
-                        ? 'bg-emerald-400/20 text-emerald-300'
+                        ? 'bg-emerald-100 text-emerald-700'
                         : isBlocked
-                          ? 'bg-red-400/20 text-red-300'
+                          ? 'bg-red-100 text-red-700'
                           : isActive
-                            ? 'bg-sky-400/20 text-sky-300'
-                            : 'bg-white/5 text-slate-500'
+                            ? 'bg-teal-100 text-[#0f766e]'
+                            : 'bg-gray-200 text-gray-500'
                     ].join(' ')}
                   >
                     {isDone ? (
@@ -157,18 +157,18 @@ export function JourneyRail({
                       <Icon className="h-4 w-4" aria-hidden />
                     )}
                   </span>
-                  <span className={`text-xs font-bold ${isDone ? 'text-emerald-200' : isActive ? 'text-sky-100' : 'text-slate-300'}`}>
+                  <span className={`text-xs font-bold ${isDone ? 'text-emerald-800' : isActive ? 'text-[#0f766e]' : 'text-gray-500'}`}>
                     {isRtl ? LABELS[stage.key].ar : LABELS[stage.key].en}
                   </span>
                 </div>
 
-                <p className="text-[11px] leading-relaxed text-slate-400">{stage.hint}</p>
+                <p className="text-[11px] leading-relaxed text-gray-600">{stage.hint}</p>
 
                 {(isActive || isBlocked) && onStageAction && (
                   <button
                     type="button"
                     onClick={() => onStageAction(stage.key)}
-                    className="mt-2 min-h-[36px] w-full rounded-xl bg-white/10 px-3 text-[11px] font-bold text-white transition-colors hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
+                    className="mt-2 min-h-[36px] w-full rounded-xl bg-[#0f766e] px-3 text-[11px] font-bold text-white transition-colors hover:bg-[#115e59] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0f766e]"
                   >
                     {isRtl ? ACTION_LABELS[stage.key].ar : ACTION_LABELS[stage.key].en}
                   </button>
@@ -180,7 +180,7 @@ export function JourneyRail({
       </ol>
 
       {blockedReason && !canInstall && (
-        <p className="mt-4 rounded-2xl border border-amber-400/30 bg-amber-400/10 p-3 text-[12px] leading-relaxed text-amber-200">
+        <p className="mt-4 rounded-2xl border border-amber-300 bg-amber-50 p-3 text-[12px] leading-relaxed text-amber-800">
           {blockedReason}
         </p>
       )}

@@ -924,12 +924,12 @@ export default function StorePage() {
             className={[
               'mb-6 flex flex-col gap-3 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between',
               flowNotice.tone === 'error'
-                ? 'border-red-400/40 bg-red-400/10 text-red-200'
+                ? 'border-red-300 bg-red-50 text-red-800'
                 : flowNotice.tone === 'warn'
-                  ? 'border-amber-400/40 bg-amber-400/10 text-amber-200'
+                  ? 'border-amber-300 bg-amber-50 text-amber-800'
                   : flowNotice.tone === 'success'
-                    ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-200'
-                    : 'border-sky-400/40 bg-sky-400/10 text-sky-200'
+                    ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
+                    : 'border-teal-300 bg-teal-50 text-teal-800'
             ].join(' ')}
           >
             <p className="text-[13px] leading-relaxed">{flowNotice.text}</p>
@@ -939,7 +939,7 @@ export default function StorePage() {
                   type="button"
                   onClick={() => flowNotice.action?.run()}
                   disabled={enrollmentStarting}
-                  className="min-h-[40px] rounded-xl bg-white/15 px-4 text-xs font-bold text-white transition-colors hover:bg-white/25 disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
+                  className="min-h-[40px] rounded-xl bg-[#0f766e] px-4 text-xs font-bold text-white transition-colors hover:bg-[#115e59] disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0f766e]"
                 >
                   {enrollmentStarting ? (isRtl ? 'جارٍ التجهيز…' : 'Preparing…') : flowNotice.action.label}
                 </button>
@@ -948,7 +948,7 @@ export default function StorePage() {
                 type="button"
                 onClick={() => setFlowNotice(null)}
                 aria-label={isRtl ? 'إغلاق الإشعار' : 'Dismiss'}
-                className="min-h-[40px] rounded-xl px-3 text-xs text-white/60 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
+                className="min-h-[40px] rounded-xl px-3 text-xs text-current opacity-60 transition-opacity hover:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current"
               >
                 ✕
               </button>
@@ -958,8 +958,8 @@ export default function StorePage() {
 
         {/* PHASE-09: حالة الطلب مرئية للمستخدم — لا انتظار في الظلام */}
         {myOrders.filter((o: any) => o && ['pending', 'paid'].includes(o.status)).length > 0 && (
-          <div className="mb-6 rounded-3xl border border-sky-400/25 bg-sky-400/[0.07] p-5 backdrop-blur-xl">
-            <h3 className="mb-3 text-sm font-bold text-sky-200">
+          <div className="mb-6 rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
+            <h3 className="mb-3 text-sm font-bold text-[#0f766e]">
               {isRtl ? 'طلباتك الجارية' : 'Your pending orders'}
             </h3>
             <ul className="space-y-2">
@@ -968,11 +968,11 @@ export default function StorePage() {
                 .map((o: any) => (
                   <li
                     key={o.id}
-                    className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-white/[0.04] px-4 py-3"
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-gray-50 px-4 py-3"
                   >
-                    <span className="font-mono text-xs text-sky-100">{o.ref || `#${o.id}`}</span>
-                    <span className="text-[11px] text-slate-300">{o.plan_name || ''}</span>
-                    <span className="rounded-full bg-amber-400/15 px-3 py-1 text-[11px] font-bold text-amber-200">
+                    <span className="font-mono text-xs text-gray-700">{o.ref || `#${o.id}`}</span>
+                    <span className="text-[11px] text-gray-500">{o.plan_name || ''}</span>
+                    <span className="rounded-full bg-amber-100 px-3 py-1 text-[11px] font-bold text-amber-800">
                       {o.status_label || (o.status === 'paid'
                         ? (isRtl ? 'تم استلام الدفع — جارٍ التفعيل' : 'Paid — activating')
                         : (isRtl ? 'بانتظار تأكيد الدفع' : 'Awaiting payment confirmation'))}
@@ -980,7 +980,7 @@ export default function StorePage() {
                   </li>
                 ))}
             </ul>
-            <p className="mt-3 text-[11px] leading-relaxed text-slate-400">
+            <p className="mt-3 text-[11px] leading-relaxed text-gray-500">
               {isRtl
                 ? 'أرسل رقم الطلب مع إثبات الدفع عبر تيليجرام — يُفعَّل اشتراكك فور التأكيد تلقائياً وبلا كود يدوي.'
                 : 'Send the order reference with your payment proof — activation is automatic on confirmation.'}
