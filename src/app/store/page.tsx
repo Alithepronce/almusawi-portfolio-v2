@@ -695,7 +695,7 @@ export default function StorePage() {
       const queryParams = new URLSearchParams();
       if (ticket) queryParams.set('ticket', ticket);
       if (realUdid) queryParams.set('udid', realUdid);
-      queryParams.set('fresh', '1');
+      // Bust Safari browser cache with t without forcing server re-signing
       queryParams.set('t', Date.now().toString());
 
       const url = `${API_BASE_URL}/api/ota/install-latest?${queryParams.toString()}`;
@@ -732,64 +732,47 @@ export default function StorePage() {
   // فتبقى الفجوة بين "دفع" و"تفعيل" معتمدة على الذاكرة البشرية.
   const handlePlanCheckout = async (plan: { id: string; days: number; name: Record<string, string>; price: string; currency: Record<string, string> }) => {
     playClick();
-    const planLabel = plan.name[lang];
-    const planPrice = `${plan.price} ${plan.currency[lang]}`;
-
     if (!authToken) {
       setIsRegisterOpen(true);
-      setFlowNotice({
-        tone: 'info',
-        text: isRtl
-          ? 'أنشئ حسابك أولاً ليُربط طلبك ويُفعَّل اشتراكك تلقائياً فور تأكيد الدفع.'
-          : 'Create your account first so your order is linked and activated automatically once payment is confirmed.'
-      });
+      setFlowNotice({ tone: 'info', text: isRtl ? 'أنشئ حسابك أولاً كي يبقى الدفع وUDID والشهادة في ملف خدمة واحد.' : 'Create an account first so payment, device enrollment, and certificate stay in one service case.' });
       return;
     }
-
-    const matched = serverPlans.find((p: any) => Number(p.duration_days) === plan.days);
+    const matched = serverPlans.find((item: any) => Number(item.duration_days) === plan.days);
+    if (!matched?.id) {
+      setFlowNotice({ tone: 'error', text: isRtl ? 'هذه الباقة غير متاحة حالياً.' : 'This plan is currently unavailable.' });
+      return;
+    }
     setOrderPending(plan.id);
     try {
-      let ref: string | null = null;
-      if (matched?.id) {
-        const res = await fetch(`${API_BASE_URL}/api/subscriptions/orders`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
-          body: JSON.stringify({ plan_id: matched.id, channel: 'telegram' })
-        });
-        const data = await res.json();
-        if (res.ok) {
-          ref = data.ref;
-          setMyOrders((prev) => [data.order, ...prev.filter((o: any) => o?.id !== data.order?.id)]);
-          setFlowNotice({
-            tone: 'success',
-            text: isRtl
-              ? `تم تسجيل طلبك برقم ${ref}. أرسله مع إثبات الدفع، وسيُفعَّل اشتراكك فور التأكيد — بلا كود يدوي.`
-              : `Order ${ref} recorded. Send it with your payment proof and your subscription activates on confirmation.`
-          });
-        }
-      }
-
-      // رسالة تيليجرام تحمل المرجع فيربط الأدمن الدفع بالحساب بلا تخمين
-      const msg = [
-        'السلام عليكم',
-        `أرغب في الاشتراك في ${planLabel} لمتجر زمام ستور (${planPrice}).`,
-        '',
-        ref ? `رقم الطلب: ${ref}` : '',
-        `الاسم: ${currentUser?.full_name || '—'}`,
-        `البريد: ${currentUser?.email || '—'}`,
-        enrollment.udid || capturedUdid ? `معرّف الجهاز: ${enrollment.udid || capturedUdid}` : ''
-      ].filter(Boolean).join('\n');
-
-      window.open(`https://t.me/Jormunghandr?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
-    } catch {
-      setFlowNotice({
-        tone: 'error',
-        text: isRtl ? 'تعذّر تسجيل الطلب — أعد المحاولة.' : 'Could not record the order — please retry.',
-        action: { label: isRtl ? 'إعادة المحاولة' : 'Retry', run: () => handlePlanCheckout(plan) }
+      const response = await fetch(`${API_BASE_URL}/api/checkout/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+        body: JSON.stringify({ plan_id: matched.id })
       });
-    } finally {
-      setOrderPending(null);
-    }
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || 'تعذّر إنشاء طلب الخدمة');
+      const serviceCase = data.case;
+      setMyOrders((prev) => [{ id: serviceCase.order_id, ref: serviceCase.order_ref, status: 'pending', plan_name: plan.name[lang] }, ...prev.filter((item: any) => item?.id !== serviceCase.order_id)]);
+      if (data.payment?.checkout_url) {
+        setFlowNotice({
+          tone: 'success',
+          text: isRtl ? `تم إنشاء ملف خدمتك ${serviceCase.case_ref}. أكمل الدفع الآمن للانتقال تلقائياً إلى توثيق جهازك.` : `Your service case ${serviceCase.case_ref} is ready. Complete secure payment to continue automatically.`,
+          action: { label: isRtl ? 'الدفع الآن' : 'Pay now', run: () => window.location.assign(data.payment.checkout_url) }
+        });
+        window.location.assign(data.payment.checkout_url);
+        return;
+      }
+      const linkResponse = await fetch(`${API_BASE_URL}/api/telegram/link-code`, { method: 'POST', headers: { Authorization: `Bearer ${authToken}` } });
+      const linkData = await linkResponse.json().catch(() => ({}));
+      const botLink = linkResponse.ok && linkData.code ? `https://t.me/Jormunghandr?start=link_${encodeURIComponent(linkData.code)}` : 'https://t.me/Jormunghandr';
+      setFlowNotice({
+        tone: 'info',
+        text: isRtl ? `تم إنشاء ملف خدمتك ${serviceCase.case_ref}. الدفع اليدوي مفعّل حالياً؛ افتح البوت لإرسال تفاصيل الدفع ومتابعة الحالة.` : `Your service case ${serviceCase.case_ref} is ready. Manual payment is active; open the bot to continue and track progress.`,
+        action: { label: isRtl ? 'فتح بوت زمام' : 'Open ZMAM bot', run: () => window.open(botLink, '_blank', 'noopener') }
+      });
+    } catch (error: any) {
+      setFlowNotice({ tone: 'error', text: error?.message || (isRtl ? 'تعذّر إنشاء طلب الخدمة.' : 'Could not create the service case.'), action: { label: isRtl ? 'إعادة المحاولة' : 'Retry', run: () => handlePlanCheckout(plan) } });
+    } finally { setOrderPending(null); }
   };
 
   const currentModule = storeModules.find((m) => m.id === activeTab) || storeModules[0];
