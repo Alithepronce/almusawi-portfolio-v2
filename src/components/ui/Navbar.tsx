@@ -79,15 +79,15 @@ export default function Navbar() {
             <span>{t('switchLang', lang)}</span>
           </button>
 
-          {/* Contact Direct CTA Button */}
-          <Link
-            href="/contact"
+          {/* ZMAM Platform CTA (Contact stays in the main nav) */}
+          <a
+            href="https://zmam.dev"
             onClick={playClick}
-            className="hidden sm:inline-flex items-center gap-1 px-4 py-1 text-xs font-bold rounded-full bg-[#1d1d1f] text-white hover:bg-black transition"
+            className="hidden sm:inline-flex items-center gap-1 px-4 py-1 text-xs font-bold rounded-full bg-[#1d1d1f] text-white hover:bg-black transition whitespace-nowrap"
           >
-            <span>{lang === 'ar' ? 'تواصل' : 'Contact'}</span>
+            <span>{lang === 'ar' ? 'منصة زمام' : 'ZMAM Platform'}</span>
             <ArrowUpRight size={12} />
-          </Link>
+          </a>
 
           {/* Mobile/Tablet Menu Toggle */}
           <button
@@ -128,6 +128,13 @@ export default function Navbar() {
                   {t(item.labelKey, lang)}
                 </Link>
               ))}
+              <a
+                href="https://zmam.dev"
+                onClick={playClick}
+                className="col-span-2 sm:col-span-3 rounded-2xl p-3 text-sm font-bold text-center bg-[#0066cc] text-white"
+              >
+                {lang === 'ar' ? 'ادخل منصة زمام ←' : 'Enter the ZMAM Platform →'}
+              </a>
             </div>
           </motion.div>
         )}

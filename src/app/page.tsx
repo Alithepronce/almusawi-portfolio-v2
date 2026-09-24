@@ -152,6 +152,15 @@ export default function Home() {
 
             {/* Action Buttons */}
             <div className="flex flex-wrap items-center justify-center gap-4">
+              <a
+                href="https://zmam.dev"
+                onClick={playClick}
+                onMouseEnter={playHover}
+                className="inline-flex min-h-12 items-center gap-2.5 rounded-full bg-[#0066cc] px-8 py-3.5 text-sm font-bold text-white transition hover:bg-[#0055aa] shadow-lg"
+              >
+                <span>{isArabic ? 'ادخل منصة زمام' : 'Enter the ZMAM Platform'}</span>
+                {isArabic ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
+              </a>
               <Link
                 href="/apps"
                 onClick={playClick}
