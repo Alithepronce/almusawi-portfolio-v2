@@ -27,25 +27,15 @@ function PortalContent({ token }: { token: string }) {
   useEffect(() => {
     async function fetchPortal() {
       try {
-        const { data: portal } = await supabase
-          .from('customer_portals')
-          .select('*, customers(id, name, phone)')
-          .eq('token', token)
-          .eq('is_active', true)
-          .maybeSingle();
-        if (!portal || !portal.customers) {
+        // One server-side lookup by token: the tables themselves are not readable anonymously.
+        const { data: portal } = await supabase.rpc('warraq_portal_by_token', { p_token: token });
+        if (!portal?.customer) {
           setError('البوابة غير موجودة أو غير نشطة');
           setLoading(false);
           return;
         }
-        setCustomer(portal.customers);
-        const { data: customerOrders } = await supabase
-          .from('orders')
-          .select('*, services(name, price)')
-          .eq('customer_id', portal.customers.id)
-          .eq('owner_id', portal.user_id)
-          .order('created_at', { ascending: false });
-        setOrders(customerOrders || []);
+        setCustomer(portal.customer);
+        setOrders(Array.isArray(portal.orders) ? portal.orders : []);
       } catch {
         setError('حدث خطأ أثناء تحميل البيانات');
       } finally {

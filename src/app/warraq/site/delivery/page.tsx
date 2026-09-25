@@ -230,21 +230,24 @@ export default function DeliveryAppPage() {
          throw new Error('لم يتم العثور على حساب كابتن توصيل مرتبط بهذا البريد.');
       }
 
-      const fileExt = receiptFile.name.split('.').pop();
-      const fileName = `receipts/driver_${user.id}_${Date.now()}.${fileExt}`;
+      // The type decides the extension; the user's file name is never used in the path.
+      const RECEIPT_TYPES: Record<string, string> = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'application/pdf': 'pdf' };
+      const fileExt = RECEIPT_TYPES[receiptFile.type];
+      if (!fileExt || receiptFile.size > 10 * 1024 * 1024) throw new Error('الإيصال لازم يكون صورة أو PDF أصغر من 10 ميگا');
+      const fileName = `receipts/${user.id}/${crypto.randomUUID()}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('order-files')
         .upload(fileName, receiptFile, {
           cacheControl: '3600',
+          contentType: receiptFile.type,
           upsert: false
         });
 
       if (uploadError) throw new Error('فشل رفع صورة الإيصال: ' + uploadError.message);
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('order-files')
-        .getPublicUrl(fileName);
+      // Receipts live in a private bucket: store the path; staff open it with a short-lived signed URL.
+      const publicUrl = `order-files/${fileName}`;
 
       const { error: insertError } = await supabase
         .from('driver_subscription_requests')

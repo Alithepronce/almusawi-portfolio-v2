@@ -30,29 +30,21 @@ const features = [
 ];
 
 export default function LandingPage() {
-  const [liveStats, setLiveStats] = useState({
-    shopsCount: 8,
-    customersCount: 154,
-    ordersCount: 940,
-    driversCount: 4,
-  });
+  const [liveStats, setLiveStats] = useState<{ shopsCount: number; customersCount: number; ordersCount: number; driversCount: number } | null>(null);
 
   useEffect(() => {
     async function loadLiveStats() {
       try {
-        const [shopsRes, customersRes, ordersRes, driversRes] = await Promise.all([
-          supabase.from('shops').select('*', { count: 'exact', head: true }),
-          supabase.from('customer_accounts').select('*', { count: 'exact', head: true }),
-          supabase.from('online_orders').select('*', { count: 'exact', head: true }),
-          supabase.from('delivery_drivers').select('*', { count: 'exact', head: true }),
-        ]);
-
-        setLiveStats({
-          shopsCount: shopsRes.count || 8,
-          customersCount: customersRes.count || 154,
-          ordersCount: ordersRes.count || 940,
-          driversCount: driversRes.count || 4,
-        });
+        // Counts only, from one function. No made-up fallback numbers: nothing shows until real data arrives.
+        const { data } = await supabase.rpc('warraq_public_stats');
+        if (data) {
+          setLiveStats({
+            shopsCount: Number(data.shops) || 0,
+            customersCount: Number(data.customers) || 0,
+            ordersCount: Number(data.orders) || 0,
+            driversCount: Number(data.drivers) || 0,
+          });
+        }
       } catch (e) {
         console.log('Error fetching website live stats:', e);
       }
@@ -153,10 +145,10 @@ export default function LandingPage() {
         <div className="w-container">
           <div className="w-bento-grid">
             {[
-              { n: `${liveStats.ordersCount}+`, l: 'طلبات طباعة مكتملة' },
-              { n: `${liveStats.shopsCount}+`, l: 'مكتبات ومطابع مسجلة' },
-              { n: `${liveStats.customersCount}+`, l: 'زبائن وطلاب نشطين' },
-              { n: `${liveStats.driversCount}+`, l: 'مناديب توصيل الأسطول' },
+              { n: liveStats ? `${liveStats.ordersCount}` : '—', l: 'طلبات طباعة مكتملة' },
+              { n: liveStats ? `${liveStats.shopsCount}` : '—', l: 'مكتبات ومطابع مسجلة' },
+              { n: liveStats ? `${liveStats.customersCount}` : '—', l: 'زبائن وطلاب نشطين' },
+              { n: liveStats ? `${liveStats.driversCount}` : '—', l: 'مناديب توصيل الأسطول' },
             ].map((s, i) => (
               <motion.div 
                 key={s.l} 

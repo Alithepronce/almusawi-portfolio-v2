@@ -48,6 +48,29 @@ export interface EnrollmentState {
 }
 
 const STORAGE_KEY = 'zmam_enrollment_token';
+// Claim secrets for sessions THIS browser started. A token that arrives in a link (?s=) without
+// one here can never be attached to the signed-in account (the server enforces the same rule).
+const SECRETS_KEY = 'zmam_enrollment_secrets';
+
+function readSecret(token: string): string | null {
+  try {
+    return JSON.parse(localStorage.getItem(SECRETS_KEY) || '{}')[token] || null;
+  } catch {
+    return null;
+  }
+}
+
+function storeSecret(token: string, secret: string) {
+  try {
+    const all = JSON.parse(localStorage.getItem(SECRETS_KEY) || '{}');
+    all[token] = secret;
+    // keep only the latest few sessions
+    const trimmed = Object.fromEntries(Object.entries(all).slice(-5));
+    localStorage.setItem(SECRETS_KEY, JSON.stringify(trimmed));
+  } catch {
+    /* private mode: the secret stays in memory for this tab */
+  }
+}
 
 const EMPTY: EnrollmentState = {
   status: 'idle',
@@ -84,6 +107,8 @@ export function useEnrollment(apiBaseUrl: string, authToken: string | null) {
   const [error, setError] = useState<string | null>(null);
   const streamRef = useRef<EventSource | null>(null);
   const claimedRef = useRef<string | null>(null);
+  const memorySecrets = useRef<Record<string, string>>({});
+  const secretFor = useCallback((token: string) => memorySecrets.current[token] || readSecret(token), []);
 
   const applyPayload = useCallback((token: string, payload: any) => {
     setState({
@@ -158,6 +183,10 @@ export function useEnrollment(apiBaseUrl: string, authToken: string | null) {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || 'تعذّر بدء جلسة التوثيق');
       storeToken(data.token);
+      if (data.claim_secret) {
+        memorySecrets.current[data.token] = data.claim_secret;
+        storeSecret(data.token, data.claim_secret);
+      }
       setState({ ...EMPTY, status: 'created', token: data.token, isOwned: Boolean(authToken) });
       watch(data.token);
       return data.mobileconfig_url as string;
@@ -174,12 +203,14 @@ export function useEnrollment(apiBaseUrl: string, authToken: string | null) {
     async (token?: string | null): Promise<{ ok: boolean; error?: string }> => {
       const target = token || state.token || readStoredToken();
       if (!target || !authToken) return { ok: false, error: 'لا توجد جلسة توثيق قابلة للربط' };
+      const secret = secretFor(target);
+      if (!secret) return { ok: false, error: 'هذي الجلسة ما بدأت من هذا المتصفح — ابدأ توثيق الجهاز من جديد' };
       if (claimedRef.current === target) return { ok: true };
       claimedRef.current = target;
       try {
         const res = await fetch(`${apiBaseUrl}/api/enrollment/${encodeURIComponent(target)}/claim`, {
           method: 'POST',
-          headers: { Authorization: `Bearer ${authToken}` }
+          headers: { Authorization: `Bearer ${authToken}`, 'x-claim-secret': secret }
         });
         const data = await res.json();
         await refresh(target);
@@ -193,7 +224,7 @@ export function useEnrollment(apiBaseUrl: string, authToken: string | null) {
         return { ok: false, error: e?.message || 'تعذّر ربط الجهاز بحسابك' };
       }
     },
-    [apiBaseUrl, authToken, refresh, state.token]
+    [apiBaseUrl, authToken, refresh, state.token, secretFor]
   );
 
   /** استئناف: من رابط العودة `?s=` أولاً، ثم من التخزين المحلي. */
@@ -230,13 +261,15 @@ export function useEnrollment(apiBaseUrl: string, authToken: string | null) {
     return () => clearInterval(id);
   }, [state.token, state.status, refresh]);
 
-  /** الضيف الذي وثّق جهازه ثم سجّل: تُربط جلسته تلقائياً بلا تدخل منه. */
+  /** الضيف الذي وثّق جهازه من هذا المتصفح ثم سجّل: تُربط جلسته تلقائياً.
+   *  جلسة وصلت برابط من مكان ثاني (بدون سرّها هنا) ما تُربط أبداً — حماية من ربط جهاز غريب بحسابك. */
   useEffect(() => {
     if (!authToken) return;
     if (!state.token || !state.udid) return;
     if (state.isOwned || state.status === 'bound') return;
+    if (!secretFor(state.token)) return;
     claim(state.token);
-  }, [authToken, state.token, state.udid, state.isOwned, state.status, claim]);
+  }, [authToken, state.token, state.udid, state.isOwned, state.status, claim, secretFor]);
 
   return { enrollment: state, start, claim, refresh, starting, error };
 }

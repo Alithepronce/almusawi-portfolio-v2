@@ -28,13 +28,10 @@ function TrackContent({ token }: { token: string }) {
   useEffect(() => {
     async function fetchOrder() {
       try {
-        const { data: tracking } = await supabase
-          .from('order_tracking')
-          .select('order_id, orders(*, services(name, price), customers(name, phone))')
-          .eq('token', token)
-          .maybeSingle();
-        if (tracking?.orders) {
-          setOrder(tracking.orders);
+        // One server-side lookup by token: the tables themselves are not readable anonymously.
+        const { data: tracked } = await supabase.rpc('warraq_track_by_token', { p_token: token });
+        if (tracked) {
+          setOrder(tracked);
         } else {
           setError('لم يتم العثور على الطلب');
         }

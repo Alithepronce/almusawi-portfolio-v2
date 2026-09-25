@@ -49,6 +49,19 @@ import { useInteractiveSounds } from '@/hooks/useInteractiveSounds';
 import { useEnrollment } from './_enrollment/useEnrollment';
 import { JourneyRail, type StageKey } from './_enrollment/JourneyRail';
 
+// URLs from API responses decide where the browser goes; only expected schemes are followed,
+// so a compromised or spoofed response can never run javascript: on this origin.
+function safeNavigate(url: unknown, schemes: string[] = ['https:']): boolean {
+  try {
+    const parsed = new URL(String(url));
+    if (!schemes.includes(parsed.protocol)) return false;
+    window.location.href = parsed.href;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 const API_BASE_URL = 'https://ios-store-production.up.railway.app';
 
 // Showcase apps catalog directly available in ZMAM Store
@@ -375,7 +388,6 @@ export default function StorePage() {
   const [regEmail, setRegEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [regConfirmPassword, setRegConfirmPassword] = useState('');
-  const [regUdid, setRegUdid] = useState('');
   const [regTerms, setRegTerms] = useState(true);
   const [regLoading, setRegLoading] = useState(false);
   const [regError, setRegError] = useState<string | null>(null);
@@ -393,20 +405,9 @@ export default function StorePage() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
-    const urlUdid = params.get('udid') || '';
-    const urlStatus = params.get('status') || '';
+    // Only the modal to open comes from the URL. Device, name and "certified" state come from the
+    // server (/api/auth/me and the enrollment session) so a crafted link cannot fake them.
     const urlAction = params.get('action') || '';
-    const urlName = params.get('name') || '';
-
-    if (urlUdid) {
-      setCapturedUdid(urlUdid);
-      setRegUdid(urlUdid);
-    }
-
-    if (urlStatus === 'certified' && urlUdid && !urlUdid.startsWith('00008101-')) {
-      setCertifiedAlert({ active: true, name: urlName, udid: urlUdid });
-      setIsCertifiedUser(true);
-    }
 
     if (urlAction === 'register') {
       setIsRegisterOpen(true);
@@ -524,7 +525,6 @@ export default function StorePage() {
           phone: regPhone,
           email: regEmail,
           password: regPassword,
-          udid: regUdid.trim() || undefined,
         })
       });
       const data = await res.json();
@@ -536,7 +536,6 @@ export default function StorePage() {
         setAuthToken(data.token); // يُمكّن الربط التلقائي لجلسة توثيق سابقة (claim)
         setCurrentUser(data.user);
       }
-      if (regUdid.trim()) setCapturedUdid(regUdid.trim());
 
       setIsRegisterOpen(false);
       setIsSuccessModalOpen(true);
@@ -624,7 +623,7 @@ export default function StorePage() {
     const username = currentUser?.username || regUsername || '—';
     const email = currentUser?.email || regEmail || '—';
     const phone = currentUser?.phone || regPhone || '—';
-    const udid = capturedUdid || regUdid || 'بانتظار التوثيق';
+    const udid = capturedUdid || 'بانتظار التوثيق';
 
     const msg = `السلام عليكم
 أرغب في الاشتراك في ${planName} لمتجر زمام ستور (${planPrice}).
@@ -707,9 +706,9 @@ export default function StorePage() {
       const data = await res.json();
       if (data.install_url) {
         setInstallMsg(isRtl ? 'تم تجهيز الرابط! جاري فتح نافذة التثبيت على جهازك...' : 'Opening install prompt...');
-        window.location.href = data.install_url;
+        safeNavigate(data.install_url, ['itms-services:', 'https:']);
       } else {
-        window.location.href = url;
+        safeNavigate(url);
       }
     } catch (err) {
       setFlowNotice({
@@ -757,9 +756,9 @@ export default function StorePage() {
         setFlowNotice({
           tone: 'success',
           text: isRtl ? `تم إنشاء ملف خدمتك ${serviceCase.case_ref}. أكمل الدفع الآمن للانتقال تلقائياً إلى توثيق جهازك.` : `Your service case ${serviceCase.case_ref} is ready. Complete secure payment to continue automatically.`,
-          action: { label: isRtl ? 'الدفع الآن' : 'Pay now', run: () => window.location.assign(data.payment.checkout_url) }
+          action: { label: isRtl ? 'الدفع الآن' : 'Pay now', run: () => safeNavigate(data.payment.checkout_url) }
         });
-        window.location.assign(data.payment.checkout_url);
+        safeNavigate(data.payment.checkout_url);
         return;
       }
       const linkResponse = await fetch(`${API_BASE_URL}/api/telegram/link-code`, { method: 'POST', headers: { Authorization: `Bearer ${authToken}` } });
@@ -783,10 +782,7 @@ export default function StorePage() {
     playClick();
     setFlowNotice(null);
     const url = await startEnrollment();
-    if (url) {
-      window.location.href = url;
-      return;
-    }
+    if (url && safeNavigate(url)) return;
     setFlowNotice({
       tone: 'error',
       text: isRtl
@@ -1996,30 +1992,7 @@ export default function StorePage() {
                   </div>
                 </div>
 
-                {/* UDID Field */}
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs font-bold text-[#1d1d1f] dark:text-neutral-200">
-                      معرّف الجهاز (UDID) — اختياري أو يتم التقاطه
-                    </label>
-                    {capturedUdid && (
-                      <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                        ✓ تم التقاطه تلقائياً
-                      </span>
-                    )}
-                  </div>
-                  <input
-                    type="text"
-                    value={regUdid}
-                    onChange={(e) => setRegUdid(e.target.value)}
-                    placeholder="00008101-000XXXXXXXXXXXXXXXX"
-                    dir="ltr"
-                    className="w-full px-4 py-3 rounded-xl border border-black/15 dark:border-white/15 bg-neutral-50 dark:bg-neutral-800 text-xs font-mono font-bold text-[#1d1d1f] dark:text-white outline-none focus:border-[#0f766e]"
-                  />
-                  <p className="text-[10px] text-[#86868b] mt-1">
-                    إذا لم تكن تعرف الـ UDID، يمكنك تركه فارغاً وتنزيل ملف التوثيق من الصفحة الرئيسية لاحقاً.
-                  </p>
-                </div>
+                {/* The device is linked only through the verified enrollment profile, never a typed UDID. */}
 
                 {/* Terms Agreement */}
                 <label className="flex items-start gap-2.5 cursor-pointer pt-2">
@@ -2202,7 +2175,7 @@ export default function StorePage() {
               </div>
 
               {/* UDID Copyable Box */}
-              {(capturedUdid || regUdid) && (
+              {capturedUdid && (
                 <div className="mb-6 p-4 rounded-2xl bg-neutral-50 dark:bg-neutral-900 border border-black/10 dark:border-white/10 text-right">
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-xs font-bold text-[#1d1d1f] dark:text-white flex items-center gap-1.5">
@@ -2210,7 +2183,7 @@ export default function StorePage() {
                       <span>معرّف جهازك الخاص (UDID):</span>
                     </span>
                     <button
-                      onClick={() => copyToClipboard(capturedUdid || regUdid)}
+                      onClick={() => copyToClipboard(capturedUdid)}
                       className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold transition ${
                         copiedUdid ? 'bg-emerald-600 text-white' : 'bg-black/5 dark:bg-white/10 text-[#1d1d1f] dark:text-white hover:bg-black/10'
                       }`}
@@ -2220,7 +2193,7 @@ export default function StorePage() {
                     </button>
                   </div>
                   <div className="text-xs font-mono font-bold text-[#0066cc] dark:text-[#38bdf8] break-all direction-ltr text-left select-all bg-white dark:bg-black/40 p-2.5 rounded-xl border border-black/5 dark:border-white/5">
-                    {capturedUdid || regUdid}
+                    {capturedUdid}
                   </div>
                 </div>
               )}
