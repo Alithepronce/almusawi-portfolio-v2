@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import PageShell from '@/components/ui/PageShell';
@@ -374,7 +374,7 @@ export default function StorePage() {
   const { enrollment, start: startEnrollment, starting: enrollmentStarting } = useEnrollment(API_BASE_URL, authToken);
 
   // الجهاز موثّق إن أكّد الخادم ذلك، أو إن أنهت جلسة التوثيق الحالية الربط للتو.
-  const hasRealDevice = Boolean(journey?.device_enrolled) || enrollment.status === 'bound';
+  const hasRealDevice = Boolean(journey?.device_registered ?? journey?.device_enrolled) || enrollment.status === 'bound';
 
   const isSubActive = Boolean(
     currentUser &&
@@ -400,6 +400,41 @@ export default function StorePage() {
 
   // Copy helper
   const [copiedUdid, setCopiedUdid] = useState(false);
+
+  // مصدر الحقيقة: /api/auth/me. يُستدعى عند التحميل، وعند انتهاء ربط الجهاز، وبعد كل تغيير.
+  const loadAccount = useCallback(async (token: string) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
+      if (res.status === 401) {
+        // جلسة منتهية/مُبطلة فعلاً: ننظّف بدل ترك واجهة "مسجّل" وهمية
+        localStorage.removeItem('zmam_store_user');
+        localStorage.removeItem('zmam_store_token');
+        localStorage.removeItem('zmam_store_certified');
+        setAuthToken(null);
+        setCurrentUser(null);
+        return;
+      }
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data?.user) return;
+      setCurrentUser(data.user);
+      setUserDevice(data.device);
+      setUserSubscription(data.subscription);
+      setJourney(data.journey || null);
+      const isAct = Boolean(data.is_certified);
+      setIsCertifiedUser(isAct);
+      localStorage.setItem('zmam_store_user', JSON.stringify(data.user));
+      localStorage.setItem('zmam_store_certified', String(isAct));
+      const hasRealDev = Boolean(data.has_real_device ?? data.journey?.device_enrolled);
+      setCertifiedAlert(
+        isAct && hasRealDev
+          ? { active: true, name: data.user.full_name, udid: data.device?.udid }
+          : { active: false, name: '', udid: '' }
+      );
+    } catch {
+      /* الشبكة متقطعة: نُبقي الجلسة المحفوظة كما هي */
+    }
+  }, []);
 
   // Parse URL search params on mount
   useEffect(() => {
@@ -443,37 +478,13 @@ export default function StorePage() {
         .catch(() => {});
     }
 
-    if (savedToken) {
-      fetch(`${API_BASE_URL}/api/auth/me`, {
-        headers: { Authorization: `Bearer ${savedToken}` }
-      })
-        .then((res) => (res.ok ? res.json() : null))
-        .then((data) => {
-          if (data && data.user) {
-            setCurrentUser(data.user);
-            setUserDevice(data.device);
-            setUserSubscription(data.subscription);
-            // مصدر الحقيقة الواحد — يُعرض كما هو ولا يُعاد حسابه هنا
-            setJourney(data.journey || null);
-            const hasRealDev = Boolean(data.has_real_device ?? data.journey?.device_enrolled);
-            const isAct = Boolean(data.is_certified);
-            setIsCertifiedUser(isAct);
-            localStorage.setItem('zmam_store_user', JSON.stringify(data.user));
-            localStorage.setItem('zmam_store_certified', String(isAct));
-            if (isAct && hasRealDev) {
-              setCertifiedAlert({
-                active: true,
-                name: data.user.full_name,
-                udid: data.device?.udid
-              });
-            } else {
-              setCertifiedAlert({ active: false, name: '', udid: '' });
-            }
-          }
-        })
-        .catch(() => {});
-    }
-  }, []);
+    if (savedToken) loadAccount(savedToken);
+  }, [loadAccount]);
+
+  // انتهى ربط الجهاز (من الـ callback أو بالمطالبة): اجلب حالة الحساب فوراً بدل بقاء الواجهة على لقطة قديمة.
+  useEffect(() => {
+    if (authToken && enrollment.status === 'bound') loadAccount(authToken);
+  }, [authToken, enrollment.status, loadAccount]);
 
   const copyToClipboard = (text: string) => {
     playClick();
@@ -530,12 +541,11 @@ export default function StorePage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Registration failed');
 
-      if (data.user && data.token) {
-        localStorage.setItem('zmam_store_user', JSON.stringify(data.user));
-        localStorage.setItem('zmam_store_token', data.token);
-        setAuthToken(data.token); // يُمكّن الربط التلقائي لجلسة توثيق سابقة (claim)
-        setCurrentUser(data.user);
-      }
+      if (!data.user || !data.token) throw new Error('تم إنشاء الحساب لكن الجلسة لم تصل — سجّل الدخول من زر الدخول');
+      localStorage.setItem('zmam_store_user', JSON.stringify(data.user));
+      localStorage.setItem('zmam_store_token', data.token);
+      setAuthToken(data.token); // يُمكّن الربط التلقائي لجلسة توثيق سابقة (claim)
+      setCurrentUser(data.user);
 
       setIsRegisterOpen(false);
       setIsSuccessModalOpen(true);
@@ -561,10 +571,12 @@ export default function StorePage() {
       const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: loginIdentifier, password: loginPassword })
+        body: JSON.stringify({ email: loginIdentifier, password: loginPassword, client: 'store-web' })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Login failed');
+      // ردّ ناجح بلا توكن (تحدّي 2FA أو غيره) لا يُعدّ دخولاً — كان يُخزَّن "undefined" ويبقى الزائر خارج الحساب.
+      if (!data.token || !data.user) throw new Error(data.message || 'تعذّر إكمال الدخول، حاول مجدداً');
 
       localStorage.setItem('zmam_store_user', JSON.stringify(data.user));
       localStorage.setItem('zmam_store_token', data.token);
@@ -1101,7 +1113,7 @@ export default function StorePage() {
                 </h3>
                 <p className="text-xs text-[#515154] leading-relaxed mb-6">
                   {hasRealDevice
-                    ? `جهازك موثق بنجاح بالمعرّف (${userDevice.udid.slice(0, 8)}...${userDevice.udid.slice(-6)})، يمكنك تثبيت التطبيقات فورياً.`
+                    ? `جهازك موثق بنجاح بالمعرّف (${(userDevice?.udid || enrollment.udid || '').slice(0, 8)}...${(userDevice?.udid || enrollment.udid || '').slice(-6)})، يمكنك تثبيت التطبيقات فورياً.`
                     : 'حمّل ملف التعريف المباشر لجهازك لاستخراج الـ UDID والتوجيه التلقائي لإنشاء الحساب أو التثبيت المباشر.'}
                 </p>
               </div>
@@ -1117,15 +1129,14 @@ export default function StorePage() {
                     <span>{hasRealDevice ? 'تحديث ملف توثيق الجهاز' : 'بدء توثيق هذا الجهاز (Safari)'}</span>
                   </button>
                 ) : (
-                  <a
-                    href={`${API_BASE_URL}/api/udid/guest-mobileconfig`}
-                    onClick={playClick}
+                  <button
+                    onClick={triggerAutoUDIDEnrollment}
                     onMouseEnter={playHover}
-                    className="w-full py-3.5 px-4 rounded-full bg-[#0f766e] text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#115e59] transition shadow-md"
+                    className="w-full py-3.5 px-4 rounded-full bg-[#0f766e] text-white font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#115e59] transition shadow-md cursor-pointer"
                   >
                     <Download size={15} />
                     <span>تنزيل ملف التوثيق (Safari)</span>
-                  </a>
+                  </button>
                 )}
                 <p className="text-[10px] text-center text-[#86868b] mt-2">
                   يفتح في الإعدادات لتثبيت البروفايل آلياً
